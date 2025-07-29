@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <title>Agregar nuevo cliente</title>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl w-full max-w-5xl shadow-lg p-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Nuevo Cliente</h2>
+
+    <form class="grid md:grid-cols-2 gap-8">
+      <!-- Columna izquierda -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Nombre del cliente</label>
+          <input type="text" class="w-full border rounded px-3 py-2" placeholder="Ej: Juan Carlos Mendoza">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">NIT</label>
+          <input type="text" class="w-full border rounded px-3 py-2" placeholder="Ej: 123456-7">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Persona de contacto</label>
+          <input type="text" class="w-full border rounded px-3 py-2" placeholder="Ej: Chris Meza">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Teléfono</label>
+          <input type="text" class="w-full border rounded px-3 py-2" placeholder="Ej: +503 7777-8888">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Correo electrónico</label>
+          <input type="email" class="w-full border rounded px-3 py-2" placeholder="Ej: cliente@email.com">
+        </div>
+      </div>
+
+      <!-- Columna derecha -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Contador asignado</label>
+          <input type="text" class="w-full border rounded px-3 py-2" placeholder="Ej: José Arce">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Clave de Hacienda</label>
+          <input type="password" class="w-full border rounded px-3 py-2" placeholder="••••••••">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Clave de Planilla</label>
+          <input type="password" class="w-full border rounded px-3 py-2" placeholder="••••••••">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Áreas requeridas</label>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="iva" class="block text-sm text-gray-700 font-medium">Declaración IVA</label>
+              <select id="iva" name="iva" class="w-full border rounded px-3 py-2">
+                <option value="pendiente">Pendiente</option>
+                <option value="solvente">Solvente</option>
+                <option value="seguimiento">En seguimiento</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="pa" class="block text-sm text-gray-700 font-medium">Declaración PA</label>
+              <select id="pa" name="pa" class="w-full border rounded px-3 py-2">
+                <option value="pendiente">Pendiente</option>
+                <option value="solvente">Solvente</option>
+                <option value="seguimiento">En seguimiento</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="planilla" class="block text-sm text-gray-700 font-medium">Planilla</label>
+              <select id="planilla" name="planilla" class="w-full border rounded px-3 py-2">
+                <option value="pendiente">Pendiente</option>
+                <option value="solvente">Solvente</option>
+                <option value="seguimiento">En seguimiento</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="contabilidad" class="block text-sm text-gray-700 font-medium">Contabilidad</label>
+              <select id="contabilidad" name="contabilidad" class="w-full border rounded px-3 py-2">
+                <option value="pendiente">Pendiente</option>
+                <option value="solvente">Solvente</option>
+                <option value="seguimiento">En seguimiento</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones abajo alineados -->
+      <div class="md:col-span-2 flex justify-between mt-8">
+        <a href="../cliente/index.html"><button type="button" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition">Regresar</button></a>
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Guardar Cliente</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

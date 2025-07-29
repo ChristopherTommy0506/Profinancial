@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | ProFinancial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .slide {
+      display: none;
+    }
+    .slide.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="bg-gray-300 flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-4xl bg-white rounded-xl shadow-lg overflow-hidden grid md:grid-cols-2">
+    <!-- Slider de imágenes -->
+    <div class="relative bg-blue-900 p-6 text-white">
+      <h1 class="text-3xl font-bold mb-4">Bienvenido a <span class="text-yellow-300">ProFinancial</span></h1>
+      <p class="mb-6">Tu solución inteligente para la gestión contable y financiera.</p>
+      <div id="slider" class="relative">
+        <img src="../../multimedia/finanzas.png" class="slide active w-full rounded-lg" alt="Finanzas 1">
+        <img src="../../multimedia/finanzas2.png" class="slide w-full rounded-lg" alt="Finanzas 2">
+        <img src="../../multimedia/finanzas3.png" class="slide w-full rounded-lg" alt="Finanzas 3">
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="p-8">
+      <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Inicia sesión en tu cuenta</h2>
+      <form action="procesar_login.php" method="POST" class="space-y-4">
+        <div>
+          <label class="block text-gray-600">Correo electrónico</label>
+          <input type="email" name="email" required class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label class="block text-gray-600">Contraseña</label>
+          <input type="password" name="password" required class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Entrar</button>
+        <p class="text-sm text-center text-gray-500 mt-4">
+          ¿No tienes una cuenta? <a href="../login/singin.html" class="text-blue-600 hover:underline">Regístrate</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll(".slide");
+    let currentSlide = 0;
+    setInterval(() => {
+      slides[currentSlide].classList.remove("active");
+      currentSlide = (currentSlide + 1) % slides.length;
+      slides[currentSlide].classList.add("active");
+    }, 3000);
+  </script>
+</body>
+</html>
