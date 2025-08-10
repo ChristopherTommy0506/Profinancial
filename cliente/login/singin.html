@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro | ProFinancial</title>
+  <link rel="icon" href="../multimedia/Logo PROFINANCIAL.png" type="Logo PF">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .slide {
@@ -12,11 +13,21 @@
     .slide.active {
       display: block;
     }
+        .background-blur {
+      position: fixed;
+      inset: 0;
+      background-image: url('/multimedia/Logo\ PROFINANCIAL.png');
+      background-size: cover;
+      background-position: center;
+      z-index: -1;
+      filter: blur(8px);
+    }
   </style>
 </head>
 <body class="bg-gray-300 flex items-center justify-center min-h-screen">
+  <div class="background-blur"></div>
   <div class="w-full max-w-4xl bg-white rounded-xl shadow-lg overflow-hidden grid md:grid-cols-2">
-    <!-- Slider de imágenes -->
+    <!-- Slider -->
     <div class="relative bg-blue-900 p-6 text-white">
       <h1 class="text-3xl font-bold mb-4">Únete a <span class="text-yellow-300">ProFinancial</span></h1>
       <p class="mb-6">Optimiza tus procesos contables y financieros con nuestra plataforma.</p>
@@ -27,7 +38,7 @@
       </div>
     </div>
 
-    <!-- Formulario de registro -->
+    <!-- Formulario  -->
     <div class="p-8">
       <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Crea tu cuenta</h2>
       <form action="procesar_registro.php" method="POST" class="space-y-4">

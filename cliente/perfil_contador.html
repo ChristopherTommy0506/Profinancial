@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-        <script src="https://cdn.tailwindcss.com"></script>
+    <title>Perfil del Contador | ProFinancial</title>
+    <link rel="icon" href="../multimedia/Logo PROFINANCIAL.png" type="Logo PF">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body {
@@ -20,12 +21,13 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex">
+<body class="bg-gray-50 min-h-screen flex relative">
+    <div class="background-blur"></div>
     <!-- Sidebar -->
-    <div class="hidden md:flex flex-col w-64 bg-white border-r min-h-screen">
+    <div class="hidden md:flex flex-col w-64 bg-white border-r min-h-screen relative z-10">
         <div class="flex items-center h-16 px-4 bg-indigo-600">
             <div class="flex items-center">
-                <img src="https://placehold.co/30x30" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
+                <img src="../multimedia/Logo PROFINANCIAL.png" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
                 <span class="ml-2 text-white font-bold">Profinancial</span>
             </div>
         </div>
@@ -42,8 +44,9 @@
             </div>
         </nav>
     </div>
+
     <!-- Contenido Principal -->
-    <div class="flex-1 flex justify-center items-start p-8">
+    <div class="flex-1 flex justify-center items-start p-8 relative z-10">
         <div class="w-full max-w-4xl">
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="bg-indigo-600 p-6 text-white">
@@ -62,7 +65,6 @@
                         
                         <div class="md:w-2/3">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <!-- Datos del perfil -->
                                 <div>
                                     <label class="block text-gray-700 text-sm font-bold mb-1">Nombre Completo</label>
                                     <div class="bg-gray-50 p-3 rounded-lg">Ana López Rodríguez</div>
@@ -90,5 +92,4 @@
     </div>
 
 </body>
-
 </html>
