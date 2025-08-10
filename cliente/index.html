@@ -4,19 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profinancial | Sistema de Gestión</title>
-    <link rel="icon" href="../multimedia/Logo PROFINANCIAL.png" type="Logo PF">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .sidebar-item.active {
-            background-color: #eef2ff;
-            color: #4f46e5;
-            border-left: 3px solid #4f46e5;
-        }
-        .search-box:focus {
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-        }
+        .sidebar-item.active { background-color: #eef2ff; color: #4f46e5; border-left: 3px solid #4f46e5; }
+        .search-box:focus { box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -25,7 +18,7 @@
         <div class="hidden md:flex flex-col w-64 bg-white border-r">
             <div class="flex items-center h-16 px-4 bg-indigo-600">
                 <div class="flex items-center">
-                    <img src="../multimedia/Logo PROFINANCIAL.png" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
+                    <img src="https://placehold.co/30x30" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
                     <span class="ml-2 text-white font-bold">Profinancial</span>
                 </div>
             </div>
@@ -80,13 +73,13 @@
                             <option value="conta">Contabilidad</option>
                         </select>
 
-                        <!-- Estado (se llena según apartado) -->
+                        <!-- Estado (según apartado) -->
                         <label class="text-sm font-medium text-gray-700">Estado</label>
                         <select id="selectEstado" class="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
 
-                        <!-- Modo -->
+                        <!-- Modo: filtrar -->
                         <label class="inline-flex items-center gap-2 text-sm">
-                            <input id="chkFiltrar" type="checkbox" class="rounded border-gray-300">
+                            <input id="chkFiltrar" type="checkbox" class="rounded border-gray-300" checked>
                             Filtrar solo coincidentes
                         </label>
                     </div>
@@ -97,7 +90,7 @@
                         </button>
                     </a>
                 </div>
-
+                
                 <!-- Tabla -->
                 <div class="bg-white rounded-lg shadow overflow-hidden">
                     <div class="overflow-x-auto">
@@ -106,32 +99,32 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIT</th>
-                                    <!--<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Registro</th>-->
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clave Hacienda</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clave Planilla</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contacto</th>
-                                    <!--<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teléfono</th>-->
-                                    <!--<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Correo</th>-->
+
+                                    <!-- NUEVAS COLUMNAS -->
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Declaración IVA</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Declaración PA</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Planilla</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contabilidad</th>
+                                    
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contador</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <!-- Ejemplo: recuerda ajustar los data-* con los estados reales -->
-                                <tr
-                                    data-iva="pendiente"
-                                    data-pa="pendiente"
-                                    data-planilla="pagada"
-                                    data-conta="pendiente"
-                                >
+                                <!-- 1 -->
+                                <tr data-iva="pendiente" data-pa="pendiente" data-planilla="pagada" data-conta="pendiente">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Empresa Ejemplo 1</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0614-120790-001-7</td>
-                                    <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">123456789</td>-->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">H12345678</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">P12345678</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Juan Pérez</td>
-                                    <!--<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">8877-6655</td>-->
-                                    <!--<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">juan@empresa.com</td>-->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="iva"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="pa"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="planilla"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="conta"></span></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Ana López</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button onclick="openModal()" class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
@@ -139,8 +132,132 @@
                                         <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
                                     </td>
                                 </tr>
-
-                                <!-- Duplica las filas y cambia los data-* y textos según corresponda -->
+                                <!-- 2 -->
+                                <tr data-iva="presentada" data-pa="realizado" data-planilla="pagada" data-conta="pendiente">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Comercial Rivera</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0614-010190-002-3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">H87654321</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">P87654321</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">María Gómez</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="iva"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="pa"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="planilla"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="conta"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Luis Torres</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- 3 -->
+                                <tr data-iva="pagada" data-pa="pendiente" data-planilla="pendiente" data-conta="realizado">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">TecnoPlus S.A.</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0614-050590-003-9</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">H11223344</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">P11223344</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Carlos Rivas</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="iva"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="pa"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="planilla"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="conta"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Ana López</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- 4 -->
+                                <tr data-iva="almacenada" data-pa="realizado" data-planilla="pagada" data-conta="pendiente">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Servicios Vega</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0614-221290-004-1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">H44556677</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">P44556677</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Patricia Vega</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="iva"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="pa"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="planilla"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="conta"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Luis Torres</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- 5 -->
+                                <tr data-iva="presentada" data-pa="pendiente" data-planilla="pendiente" data-conta="pendiente">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">AgroSal</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0614-300390-005-5</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">H99887766</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">P99887766</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rocío Campos</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="iva"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="pa"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="planilla"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="conta"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Ana López</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- 6 -->
+                                <tr data-iva="pendiente" data-pa="realizado" data-planilla="pagada" data-conta="realizado">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Inmuebles Centro</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0614-150890-006-2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">H55667788</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">P55667788</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Diego Cañas</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="iva"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="pa"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="planilla"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="conta"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Carla Núñez</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- 7 -->
+                                <tr data-iva="pagada" data-pa="pendiente" data-planilla="pagada" data-conta="pendiente">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Soft El Salvador</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0614-080680-007-0</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">H33445566</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">P33445566</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Verónica Sol</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="iva"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="pa"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="planilla"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="conta"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Luis Torres</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- 8 -->
+                                <tr data-iva="almacenada" data-pa="realizado" data-planilla="pendiente" data-conta="pendiente">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Importadora López</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0614-201285-008-6</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">H22113344</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">P22113344</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Samuel López</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="iva"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="pa"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="planilla"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="estado-badge" data-col="conta"></span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Carla Núñez</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -148,7 +265,7 @@
                         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                             <div>
                                 <p class="text-sm text-gray-700">
-                                    Mostrando <span class="font-medium">1</span> a <span class="font-medium">5</span> de <span class="font-medium">25</span> resultados
+                                    Mostrando <span class="font-medium">1</span> a <span class="font-medium">8</span> de <span class="font-medium">8</span> resultados
                                 </p>
                             </div>
                             <div>
@@ -157,15 +274,9 @@
                                         <span class="sr-only">Anterior</span>
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
-                                    <a href="#" aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        1
-                                    </a>
-                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        2
-                                    </a>
-                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        3
-                                    </a>
+                                    <a href="#" aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</a>
+                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">2</a>
+                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text sm font-medium">3</a>
                                     <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                         <span class="sr-only">Siguiente</span>
                                         <i class="fas fa-chevron-right"></i>
@@ -220,101 +331,92 @@
     </div>
 
     <script>
-    // Modal helpers
-    function openModal() {
-      document.getElementById('modal').classList.remove('hidden');
-      document.getElementById('modal').classList.add('flex');
-    }
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-      document.getElementById('modal').classList.remove('flex');
-    }
+    // Helpers modal
+    function openModal() { document.getElementById('modal').classList.remove('hidden'); document.getElementById('modal').classList.add('flex'); }
+    function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
 
-    // ------ Apartado -> Estados (como en tu imagen) ------
+    // ------ Filtro por Apartado -> Estado y badges en columnas ------
     (function(){
-      const tbody = document.querySelector("#tablaClientes tbody");
-      const $apartado   = document.getElementById("selectApartado");
-      const $estado     = document.getElementById("selectEstado");
-      const $chkFiltrar = document.getElementById("chkFiltrar");
-      const $filtroTexto= document.getElementById("filtroTexto");
+      const tbody        = document.querySelector("#tablaClientes tbody");
+      const $apartado    = document.getElementById("selectApartado");
+      const $estado      = document.getElementById("selectEstado");
+      const $chkFiltrar  = document.getElementById("chkFiltrar");
+      const $filtroTexto = document.getElementById("filtroTexto");
 
-      // Mapeo EXACTO de opciones por apartado (igual a la imagen)
+      // Opciones actualizadas
       const ESTADOS = {
         iva:      ["pendiente", "presentada", "pagada", "almacenada"],
-        pa:       ["pendiente"],
-        planilla: ["pagada"],
-        conta:    ["pendiente"]
+        pa:       ["pendiente", "realizado"],
+        planilla: ["pagada", "pendiente"],
+        conta:    ["pendiente", "realizado"]
       };
 
-      // Ranking para orden cuando no hay match exacto
-      const RANK_BASE = {
-        pendiente: 1, seguimiento: 2, presentada: 3, realizado: 3, pagada: 4, pagado: 4, almacenada: 5, almacenado: 5
+      // Badge styles (incluye "realizado")
+      const badgeClasses = (val) => {
+        const v = (val || "").toLowerCase();
+        if (v === "pendiente")                      return "bg-yellow-100 text-yellow-800";
+        if (v === "presentada")                     return "bg-blue-100 text-blue-800";
+        if (v === "realizado")                      return "bg-indigo-100 text-indigo-800";
+        if (v === "pagada" || v === "pagado")       return "bg-green-100 text-green-800";
+        if (v === "almacenada" || v === "almacenado") return "bg-gray-200 text-gray-800";
+        return "bg-slate-100 text-slate-800";
       };
 
       const norm = (s='') => s.toString().trim().toLowerCase();
-      const capitalizar = (s='') => s.charAt(0).toUpperCase() + s.slice(1);
+      const cap  = (s='') => s.charAt(0).toUpperCase() + s.slice(1);
 
-      function llenarEstados(apartado) {
-        const opts = ESTADOS[apartado] || [];
-        $estado.innerHTML = opts.map(e => `<option value="${e}">${capitalizar(e)}</option>`).join("");
+      // Pinta badges en las 4 columnas leyendo los data-* de la fila
+      function renderBadges() {
+        const rows = tbody.querySelectorAll("tr");
+        rows.forEach(row => {
+          ["iva","pa","planilla","conta"].forEach(col => {
+            const val = row.getAttribute(`data-${col}`) || "";
+            const target = row.querySelector(`.estado-badge[data-col="${col}"]`);
+            if (target) {
+              target.className = `estado-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badgeClasses(val)}`;
+              target.textContent = val ? cap(val) : "-";
+              target.title = val ? cap(val) : "-";
+            }
+          });
+        });
       }
 
-      function ordenarYFiltrar() {
-        const apartado = $apartado.value;           // iva | pa | planilla | conta
-        const estadoSel = norm($estado.value || ""); // puede venir vacío si no hay opciones
-        const textoQ   = norm($filtroTexto.value || "");
-        const filas = Array.from(tbody.querySelectorAll("tr"));
+      // Llena el select de Estado según apartado
+      function fillEstados(apartado) {
+        const opts = ESTADOS[apartado] || [];
+        $estado.innerHTML = opts.map(e => `<option value="${e}">${cap(e)}</option>`).join("");
+      }
 
-        filas.sort((a,b) => {
-          const ea = norm(a.getAttribute(`data-${apartado}`));
-          const eb = norm(b.getAttribute(`data-${apartado}`));
+      // Aplica filtro por texto + (opcional) por estado del apartado
+      function applyFilter() {
+        const apartado = $apartado.value;              // iva | pa | planilla | conta
+        const estadoSel = norm($estado.value || "");   // puede estar vacío si no hay opciones
+        const q = norm($filtroTexto.value || "");
 
-          // Si no hay estado seleccionable (ej: array vacío), solo aplica texto
-          if (!estadoSel) {
-            const na = a.querySelector("td")?.textContent.trim().toLowerCase() ?? "";
-            const nb = b.querySelector("td")?.textContent.trim().toLowerCase() ?? "";
-            return na.localeCompare(nb);
-          }
-
-          const aMatch = ea === estadoSel ? 0 : 1;
-          const bMatch = eb === estadoSel ? 0 : 1;
-          if (aMatch !== bMatch) return aMatch - bMatch;
-
-          const ra = RANK_BASE[ea] ?? 99;
-          const rb = RANK_BASE[eb] ?? 99;
-          if (ra !== rb) return ra - rb;
-
-          const na = a.querySelector("td")?.textContent.trim().toLowerCase() ?? "";
-          const nb = b.querySelector("td")?.textContent.trim().toLowerCase() ?? "";
-          return na.localeCompare(nb);
-        });
-
-        filas.forEach(f => {
-          const visiblePorTexto = textoQ ? f.innerText.toLowerCase().includes(textoQ) : true;
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        rows.forEach(row => {
+          const matchesText = q ? row.innerText.toLowerCase().includes(q) : true;
+          let matchesState = true;
 
           if ($chkFiltrar.checked && estadoSel) {
-            const val = norm(f.getAttribute(`data-${apartado}`));
-            const visiblePorEstado = (val === estadoSel);
-            f.style.display = (visiblePorTexto && visiblePorEstado) ? "" : "none";
-          } else {
-            f.style.display = visiblePorTexto ? "" : "none";
+            const val = norm(row.getAttribute(`data-${apartado}`) || "");
+            matchesState = (val === estadoSel);
           }
-          tbody.appendChild(f);
+
+          row.style.display = (matchesText && matchesState) ? "" : "none";
         });
       }
 
       // Eventos
-      $apartado.addEventListener("change", () => {
-        llenarEstados($apartado.value);
-        ordenarYFiltrar();
-      });
-      $estado.addEventListener("change", ordenarYFiltrar);
-      $chkFiltrar.addEventListener("change", ordenarYFiltrar);
-      if ($filtroTexto) $filtroTexto.addEventListener("input", ordenarYFiltrar);
+      $apartado.addEventListener("change", () => { fillEstados($apartado.value); applyFilter(); });
+      $estado.addEventListener("change", applyFilter);
+      $chkFiltrar.addEventListener("change", applyFilter);
+      $filtroTexto.addEventListener("input", applyFilter);
 
-      // init
-      llenarEstados($apartado.value);
-      ordenarYFiltrar();
+      // Init
+      fillEstados($apartado.value);
+      renderBadges();
+      applyFilter();
     })();
     </script>
 </body>
