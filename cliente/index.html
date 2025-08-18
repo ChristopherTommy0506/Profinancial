@@ -309,27 +309,69 @@
         </div>
     </div>
 
-    <!-- Modal Detalle -->
+        <!-- Modal Detalle (versión en columnas) -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 relative">
         <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600" aria-label="Cerrar">
-          <i class="fas fa-times"></i>
+        <i class="fas fa-times"></i>
         </button>
-        <h2 class="text-xl font-bold mb-4 text-gray-800">Detalles del Cliente</h2>
-        <div class="space-y-2">
-          <p><span class="font-semibold">Nombre:</span> Empresa Ejemplo 1</p>
-          <p><span class="font-semibold">NIT:</span> 0614-120790-001-7</p>
-          <p><span class="font-semibold">Registro:</span> 123456789</p>
-          <p><span class="font-semibold">Clave Hacienda:</span> H12345678</p>
-          <p><span class="font-semibold">Clave Planilla:</span> P12345678</p>
-          <p><span class="font-semibold">Contacto:</span> Juan Pérez</p>
-          <p><span class="font-semibold">Teléfono:</span> 8877-6655</p>
-          <p><span class="font-semibold">Correo:</span> juan@empresa.com</p>
-          <p><span class="font-semibold">Contador:</span> Ana López</p>
-          <a href="../cliente/perfil_cliente.html"><button class="text-white hover:text-gray-800 bg-indigo-600 mr-3 p-1 rounded-lg">Perfil</button></a>
+
+        <h2 class="text-xl font-bold mb-5 text-gray-800">Detalles del Cliente</h2>
+
+        <!-- Grid 2 columnas en pantallas ≥640px -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3 text-sm">
+        <div>
+            <span class="block text-gray-500 font-semibold">Nombre:</span>
+            <span class="block text-gray-900">Empresa Ejemplo 1</span>
         </div>
-      </div>
+        <div>
+            <span class="block text-gray-500 font-semibold">NIT:</span>
+            <span class="block text-gray-900">0614-120790-001-7</span>
+        </div>
+
+        <div>
+            <span class="block text-gray-500 font-semibold">Registro:</span>
+            <span class="block text-gray-900">123456789</span>
+        </div>
+        <div>
+            <span class="block text-gray-500 font-semibold">Clave Hacienda:</span>
+            <span class="block text-gray-900">H12345678</span>
+        </div>
+
+        <div>
+            <span class="block text-gray-500 font-semibold">Clave Planilla:</span>
+            <span class="block text-gray-900">P12345678</span>
+        </div>
+        <div>
+            <span class="block text-gray-500 font-semibold">Contacto:</span>
+            <span class="block text-gray-900">Juan Pérez</span>
+        </div>
+
+        <div>
+            <span class="block text-gray-500 font-semibold">Teléfono:</span>
+            <span class="block text-gray-900">8877-6655</span>
+        </div>
+        <div>
+            <span class="block text-gray-500 font-semibold">Correo:</span>
+            <span class="block text-gray-900">juan@empresa.com</span>
+        </div>
+
+        <div>
+            <span class="block text-gray-500 font-semibold">Contador:</span>
+            <span class="block text-gray-900">Ana López</span>
+        </div>
+        </div>
+
+        <div class="mt-5">
+        <a href="../cliente/perfil_cliente.html">
+            <button class="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg">
+            Perfil
+            </button>
+        </a>
+        </div>
     </div>
+    </div>
+
 
     <!-- Modal Eliminar -->
     <div id="deleteModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
@@ -528,3 +570,4 @@
     </script>
 </body>
 </html>
+ 
