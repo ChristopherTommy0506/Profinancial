@@ -97,18 +97,22 @@ function fechaPeriodo($anio,$mes){
                     <span class="ml-2 text-white font-bold">Profinancial</span>
                 </div>
             </div>
-            <nav class="flex-1 p-4">
-                <div class="space-y-2">
-                    <a href="#" id="clientes-tab" class="sidebar-item active flex items-center p-3 rounded-lg">
-                        <i class="fas fa-users mr-3 text-gray-500"></i>
-                        Clientes
-                    </a>
-                    <a href="../cliente/perfil_contador.html" id="perfil-tab" class="sidebar-item flex items-center p-3 rounded-lg">
-                        <i class="fas fa-user-circle mr-3 text-gray-500"></i>
-                        Mi Perfil
-                    </a>
-                </div>
-            </nav>
+         <nav class="flex-1 p-4">
+            <div class="space-y-2">
+                <a href="../cliente/index.php" id="clientes-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                    <i class="fas fa-users mr-3 text-gray-500"></i>
+                    Clientes
+                </a>
+                    <a href="../cliente/consolidado.html" id="consolidado-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                    <i class="fas fa-file-alt mr-3 text-gray-500"></i>
+                    Consolidado
+                </a>
+                <a href="../cliente/perfil_contador.html" id="perfil-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                    <i class="fas fa-user-circle mr-3 text-gray-500"></i>
+                    Mi Perfil
+                </a>
+            </div>
+        </nav>
         </div>
 
         <!-- Contenido principal  -->
@@ -483,5 +487,18 @@ function fechaPeriodo($anio,$mes){
       applyFilter();
     })();
     </script>
+  <!-- Scrip de onclik -->
+  <script>
+    const currentPage = window.location.pathname.split("/").pop();
+
+    document.querySelectorAll(".sidebar-item").forEach(item => {
+        const linkPage = item.getAttribute("href").split("/").pop(); 
+        if (linkPage === currentPage) {
+            item.classList.add("active"); 
+        } else {
+            item.classList.remove("active"); 
+        }
+    });
+</script>
 </body>
 </html>

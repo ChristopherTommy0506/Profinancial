@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProFinancial - Consolidado de Clientes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-item.active {
+            background-color: #eef2ff;
+            color: #4f46e5;
+            border-left: 3px solid #4f46e5;
+        }
+        .search-box:focus {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+    </style>
+<body class="flex bg-gray-100">
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center h-16 px-4 bg-indigo-600">
+                <div class="flex items-center">
+                    <img src="https://placehold.co/30x30" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
+                    <span class="ml-2 text-white font-bold">Profinancial</span>
+                </div>
+            </div>
+        <nav class="flex-1 p-4">
+            <div class="space-y-2">
+                <a href="../cliente/index.php" id="clientes-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                    <i class="fas fa-users mr-3 text-gray-500"></i>
+                    Clientes
+                </a>
+                    <a href="../cliente/consolidado.html" id="consolidado-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                    <i class="fas fa-file-alt mr-3 text-gray-500"></i>
+                    Consolidado
+                </a>
+                <a href="../cliente/perfil_contador.html" id="perfil-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                    <i class="fas fa-user-circle mr-3 text-gray-500"></i>
+                    Mi Perfil
+                </a>
+            </div>
+        </nav>
+        </div>
+
+  <!-- Contenido principal -->
+  <main class="flex-1 p-8">
+  <!-- Fila superior con título, botón y filtros -->
+  <div class="flex md:flex-row md:items-center md:justify-between gap-4 mb-4">
+    <h2 class="text-2xl font-bold">Consolidado General de Clientes</h2>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <!-- Botón Editar Tabla -->
+      <button id="editarTabla" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+        <i class="fas fa-edit mr-2"></i>Editar Tabla
+      </button>
+
+      <!-- Filtro Año -->
+      <select id="filtroAno" class="border rounded px-3 py-2">
+        <option selected>Año</option>
+        <option>2023</option>
+        <option>2024</option>
+        <option>2025</option>
+      </select>
+
+      <!-- Filtro Mes -->
+      <select id="filtroMes" class="border rounded px-3 py-2">
+        <option selected>Mes</option>
+        <option>Enero</option>
+        <option>Febrero</option>
+        <option>Marzo</option>
+        <option>Abril</option>
+        <option>Mayo</option>
+        <option>Junio</option>
+        <option>Julio</option>
+        <option>Agosto</option>
+        <option>Septiembre</option>
+        <option>Octubre</option>
+        <option>Noviembre</option>
+        <option>Diciembre</option>
+      </select>
+    </div>
+  </div>
+<div class="overflow-x-auto bg-white rounded-lg shadow-md">
+  <table class="min-w-max text-sm text-left text-gray-700">
+    <thead class="bg-blue-600 text-white">
+      <tr>
+        <th class="px-4 py-2 min-w-[150px]">Cliente</th>
+        <th class="px-4 py-2 min-w-[100px]">NIT</th>
+        <th class="px-4 py-2 min-w-[130px]">Contacto</th>
+        <th class="px-4 py-2 min-w-[120px]">Número</th>
+        <th class="px-4 py-2 min-w-[180px]">Correo</th>
+        <th class="px-4 py-2 min-w-[150px]">Contador Asignado</th>
+        <th class="px-4 py-2 min-w-[150px]">Clave de Hacienda</th>
+        <th class="px-4 py-2 min-w-[150px]">Clave de Planilla</th>
+        <th class="px-4 py-2 min-w-[120px]">Declaración IVA</th>
+        <th class="px-4 py-2 min-w-[120px]">Declaración PA</th>
+        <th class="px-4 py-2 min-w-[120px]">Planilla</th>
+        <th class="px-4 py-2 min-w-[120px]">Contabilidad</th>
+        <th class="px-4 py-2 min-w-[150px]">Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaClientes">
+      <tr class="border-b">
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">Juan Carlos Mendoza</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">89182</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">Chris Meza</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">+503 7777-8888</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">juan.mendoza@example.com</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">José Arce</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">---------------</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">---------------</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">---------------</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">---------------</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">---------------</td>
+        <td contenteditable="true" class="px-4 py-2 whitespace-nowrap">---------------</td>
+        <td class="px-4 py-2 whitespace-nowrap">
+          <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded mr-2">Guardar</button>
+          <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+  <div class="mt-4">
+  <button id="editarTabla" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+    <i class="fas fa-edit mr-2"></i>Editar Tabla
+  </button>
+    </main>
+</div>
+
+<script>
+  const editarBtn = document.getElementById("editarTabla");
+  const tabla = document.getElementById("tablaClientes");
+
+  // Inicial: deshabilitar edición
+  tabla.querySelectorAll("td[contenteditable]").forEach(td => td.setAttribute("contenteditable", "false"));
+  tabla.querySelectorAll("select").forEach(sel => sel.disabled = true);
+  tabla.querySelectorAll(".bg-green-500, .bg-red-500").forEach(btn => btn.disabled = true);
+
+  editarBtn.addEventListener("click", () => {
+    // Activar edición
+    tabla.querySelectorAll("td[contenteditable]").forEach(td => td.setAttribute("contenteditable", "true"));
+    tabla.querySelectorAll("select").forEach(sel => sel.disabled = false);
+    tabla.querySelectorAll(".bg-green-500, .bg-red-500").forEach(btn => btn.disabled = false);
+
+    // Opcional: cambiar el botón a "Modo Lectura"
+    editarBtn.textContent = "Desactivar Edición";
+    editarBtn.classList.toggle("bg-red-600");
+    editarBtn.classList.toggle("bg-blue-600");
+
+    // Permitir volver a desactivar la edición
+    editarBtn.addEventListener("click", () => {
+      tabla.querySelectorAll("td[contenteditable]").forEach(td => td.setAttribute("contenteditable", "false"));
+      tabla.querySelectorAll("select").forEach(sel => sel.disabled = true);
+      tabla.querySelectorAll(".bg-green-500, .bg-red-500").forEach(btn => btn.disabled = true);
+      editarBtn.textContent = "Editar Tabla";
+      editarBtn.classList.toggle("bg-red-600");
+      editarBtn.classList.toggle("bg-blue-600");
+    }, { once: true });
+  });
+</script>
+      <!-- Scrip de onclik -->
+  <script>
+    const currentPage = window.location.pathname.split("/").pop();
+
+    document.querySelectorAll(".sidebar-item").forEach(item => {
+        const linkPage = item.getAttribute("href").split("/").pop(); 
+        if (linkPage === currentPage) {
+            item.classList.add("active"); 
+        } else {
+            item.classList.remove("active"); 
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -22,25 +22,29 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex relative">
-    <div class="background-blur"></div>
     <!-- Sidebar -->
-    <div class="hidden md:flex flex-col w-64 bg-white border-r min-h-screen relative z-10">
+    <div class="hidden md:flex flex-col w-64 bg-white border-r">
         <div class="flex items-center h-16 px-4 bg-indigo-600">
             <div class="flex items-center">
-                <img src="../multimedia/Logo PROFINANCIAL.png" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
+                <img src="https://placehold.co/30x30" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
                 <span class="ml-2 text-white font-bold">Profinancial</span>
             </div>
         </div>
         <nav class="flex-1 p-4">
             <div class="space-y-2">
-                <a href="../cliente/index.html" class="sidebar-item flex items-center p-3 rounded-lg">
+                <a href="../cliente/index.php" id="clientes-tab" class="sidebar-item flex items-center p-3 rounded-lg">
                     <i class="fas fa-users mr-3 text-gray-500"></i>
                     Clientes
                 </a>
-                <a href="../cliente/perfilcont.html" class="sidebar-item active flex items-center p-3 rounded-lg">
+                    <a href="../cliente/consolidado.html" id="consolidado-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                    <i class="fas fa-file-alt mr-3 text-gray-500"></i>
+                    Consolidado
+                </a>
+                <a href="../cliente/perfil_contador.html" id="perfil-tab" class="sidebar-item flex items-center p-3 rounded-lg">
                     <i class="fas fa-user-circle mr-3 text-gray-500"></i>
                     Mi Perfil
                 </a>
+
             </div>
         </nav>
     </div>
@@ -90,6 +94,22 @@
             </div>
         </div>
     </div>
+
+    <!-- Script para manejar el onclick -->
+<script>
+    // Obtener el nombre del archivo actual
+    const currentPage = window.location.pathname.split("/").pop(); // ejemplo: perfil_contador.html
+
+    // Recorrer todos los items del sidebar
+    document.querySelectorAll(".sidebar-item").forEach(item => {
+        const linkPage = item.getAttribute("href").split("/").pop(); // solo el nombre del archivo
+        if (linkPage === currentPage) {
+            item.classList.add("active"); // marcar el que coincide
+        } else {
+            item.classList.remove("active"); // quitar a los demás
+        }
+    });
+</script>
 
 </body>
 </html>
