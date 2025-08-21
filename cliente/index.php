@@ -17,7 +17,7 @@ try {
     [ PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ]
   );
 
-  /* 
+  /*
    * Estados:
    *  - IVA:      pagado -> 'pagada'; presentado -> 'presentada'; si no -> 'pendiente'
    *  - PA/RENTA: (presentado OR pagado) -> 'realizado'; si no -> 'pendiente'
@@ -27,35 +27,41 @@ try {
    */
   $sql = "
     SELECT
-      c.id AS cliente_id, c.nombre AS cliente_nombre, c.nit, c.contacto, c.telefono, c.email,
-      u.nombre AS contador,
+      c.id   AS cliente_id,
+      c.nombre AS cliente_nombre,
+      c.nit, c.contacto, c.telefono, c.email,
+      c.clave_hacienda,            -- NUEVO: desde clientes
+      c.clave_planilla,            -- NUEVO: desde clientes
+      c.contador,                  -- NUEVO: desde clientes
       per.anio, per.mes,
+
       MAX(CASE WHEN tf.codigo='IVA'
            THEN CASE WHEN p.pagado=1 THEN 'pagada'
                      WHEN p.presentado=1 THEN 'presentada'
                      ELSE 'pendiente' END END) AS iva,
+
       MAX(CASE WHEN tf.codigo IN ('RENTA','PA')
            THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
                      ELSE 'pendiente' END END) AS pa,
+
       MAX(CASE WHEN tf.codigo='PLANILLA'
            THEN CASE WHEN p.pagado=1 THEN 'pagada'
                      ELSE 'pendiente' END END) AS planilla,
+
       MAX(CASE WHEN tf.codigo IN ('CONTAB','CONTABILIDAD')
            THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
-                     ELSE 'pendiente' END END) AS conta,
-      MAX(CASE WHEN ch.servicio='HACIENDA' THEN ch.usuario_servicio END) AS clave_hacienda,
-      MAX(CASE WHEN cp.servicio='PLANILLA' THEN cp.usuario_servicio END) AS clave_planilla
+                     ELSE 'pendiente' END END) AS conta
+
     FROM clientes c
-    LEFT JOIN asignaciones_cliente ac
-           ON ac.cliente_id=c.id AND ac.hasta IS NULL AND ac.rol_en_cliente='RESPONSABLE'
-    LEFT JOIN usuarios u ON u.id=ac.usuario_id
-    LEFT JOIN periodos per ON per.cliente_id=c.id
-    LEFT JOIN presentaciones p ON p.periodo_id=per.id
+    LEFT JOIN periodos per        ON per.cliente_id=c.id
+    LEFT JOIN presentaciones p    ON p.periodo_id=per.id
     LEFT JOIN tipos_formulario tf ON tf.id=p.tipo_formulario_id
-    LEFT JOIN credenciales_cliente ch ON ch.cliente_id=c.id AND ch.servicio='HACIENDA'
-    LEFT JOIN credenciales_cliente cp ON cp.cliente_id=c.id AND cp.servicio='PLANILLA'
+
     WHERE 1=1
-    GROUP BY c.id, c.nombre, c.nit, c.contacto, c.telefono, c.email, u.nombre, per.anio, per.mes
+    GROUP BY
+      c.id, c.nombre, c.nit, c.contacto, c.telefono, c.email,
+      c.clave_hacienda, c.clave_planilla, c.contador,
+      per.anio, per.mes
     ORDER BY per.anio DESC, per.mes DESC, c.nombre ASC
   ";
   $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
@@ -103,7 +109,7 @@ function fechaPeriodo($anio,$mes){
                     <i class="fas fa-users mr-3 text-gray-500"></i>
                     Clientes
                 </a>
-                    <a href="../cliente/consolidado.html" id="consolidado-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                    <a href="../cliente/consolidado.php" id="consolidado-tab" class="sidebar-item flex items-center p-3 rounded-lg">
                     <i class="fas fa-file-alt mr-3 text-gray-500"></i>
                     Consolidado
                 </a>
@@ -385,7 +391,7 @@ function fechaPeriodo($anio,$mes){
 
       function fillEstados(apartado) {
         const opts = ESTADOS[apartado] || [];
-        $estado.innerHTML = opts.map(e => `<option value="${e}">${cap(e)}</option>`).join("");
+        $estado.innerHTML = opts.map(e => `<option value=\"${e}\">${cap(e)}</option>`).join("");
       }
 
       function uniqueYears() {
@@ -399,23 +405,23 @@ function fechaPeriodo($anio,$mes){
 
       function fillAnios() {
         const años = uniqueYears();
-        $anio.innerHTML = `<option value="">Todos</option>` + años.map(y=>`<option value="${y}">${y}</option>`).join("");
+        $anio.innerHTML = `<option value=\"\">Todos</option>` + años.map(y=>`<option value=\"${y}\">${y}</option>`).join("");
       }
 
       function fillMeses(habilitar) {
-        $mes.innerHTML = `<option value="">Todos</option>` + MESES.map(m=>`<option value="${m.v}">${m.n}</option>`).join("");
+        $mes.innerHTML = `<option value=\"\">Todos</option>` + MESES.map(m=>`<option value=\"${m.v}\">${m.n}</option>`).join("");
         $mes.disabled = !habilitar;
       }
 
       function daysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
 
       function fillDias(habilitar, year, month) {
-        $dia.innerHTML = `<option value="">Todos</option>`;
+        $dia.innerHTML = `<option value=\"\">Todos</option>`;
         if (habilitar && year && month) {
           const max = daysInMonth(year, month);
           let opts = "";
-          for (let d=1; d<=max; d++) opts += `<option value="${d}">${d}</option>`;
-          $dia.innerHTML = `<option value="">Todos</option>` + opts;
+          for (let d=1; d<=max; d++) opts += `<option value=\"${d}\">${d}</option>`;
+          $dia.innerHTML = `<option value=\"\">Todos</option>` + opts;
         }
         $dia.disabled = !habilitar;
       }

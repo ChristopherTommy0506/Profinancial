@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 19-08-2025 a las 00:36:30
+-- Tiempo de generación: 21-08-2025 a las 00:56:54
 -- Versión del servidor: 9.1.0
 -- Versión de PHP: 8.3.14
 
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `bitacora_actividad` (
   KEY `idx_bitacora_usuario` (`usuario_id`),
   KEY `idx_bitacora_accion` (`accion`),
   KEY `idx_bitacora_entidad` (`entidad`,`entidad_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `bitacora_actividad`
@@ -175,7 +175,17 @@ INSERT INTO `bitacora_actividad` (`id`, `usuario_id`, `accion`, `entidad`, `enti
 (72, NULL, 'CREAR_PRESENTACION', 'presentaciones', 52, '{\"pagado\": 0, \"periodo_id\": 10, \"presentado\": 1, \"tipo_formulario_id\": 2}', NULL, '2025-08-18 23:55:58'),
 (73, NULL, 'CREAR_PRESENTACION', 'presentaciones', 53, '{\"pagado\": 0, \"periodo_id\": 10, \"presentado\": 0, \"tipo_formulario_id\": 3}', NULL, '2025-08-18 23:55:58'),
 (74, NULL, 'CREAR_PRESENTACION', 'presentaciones', 54, '{\"pagado\": 0, \"periodo_id\": 10, \"presentado\": 1, \"tipo_formulario_id\": 4}', NULL, '2025-08-18 23:55:58'),
-(75, NULL, 'CREAR_PRESENTACION', 'presentaciones', 55, '{\"pagado\": 1, \"periodo_id\": 10, \"presentado\": 1, \"tipo_formulario_id\": 5}', NULL, '2025-08-18 23:55:58');
+(75, NULL, 'CREAR_PRESENTACION', 'presentaciones', 55, '{\"pagado\": 1, \"periodo_id\": 10, \"presentado\": 1, \"tipo_formulario_id\": 5}', NULL, '2025-08-18 23:55:58'),
+(76, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(77, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 2, '{\"antes\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(78, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 3, '{\"antes\": {\"nit\": \"0614-100303-003-2\", \"nrc\": \"20003-3\", \"nombre\": \"Cobalto Foods S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100303-003-2\", \"nrc\": \"20003-3\", \"nombre\": \"Cobalto Foods S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(79, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 4, '{\"antes\": {\"nit\": \"0614-100404-004-3\", \"nrc\": \"20004-4\", \"nombre\": \"Eclipse Retail S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100404-004-3\", \"nrc\": \"20004-4\", \"nombre\": \"Eclipse Retail S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(80, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 5, '{\"antes\": {\"nit\": \"0614-100505-005-4\", \"nrc\": \"20005-5\", \"nombre\": \"Fénix Agro S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100505-005-4\", \"nrc\": \"20005-5\", \"nombre\": \"Fénix Agro S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(81, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 6, '{\"antes\": {\"nit\": \"0614-100606-006-5\", \"nrc\": \"20006-6\", \"nombre\": \"Galaxia Media S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100606-006-5\", \"nrc\": \"20006-6\", \"nombre\": \"Galaxia Media S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(82, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 7, '{\"antes\": {\"nit\": \"0614-100707-007-6\", \"nrc\": \"20007-7\", \"nombre\": \"Horizonte Construcciones S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100707-007-6\", \"nrc\": \"20007-7\", \"nombre\": \"Horizonte Construcciones S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(83, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 8, '{\"antes\": {\"nit\": \"0614-100808-008-7\", \"nrc\": \"20008-8\", \"nombre\": \"Ícaro Travel S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100808-008-7\", \"nrc\": \"20008-8\", \"nombre\": \"Ícaro Travel S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(84, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 9, '{\"antes\": {\"nit\": \"0614-100909-009-8\", \"nrc\": \"20009-9\", \"nombre\": \"Jaguar Security S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100909-009-8\", \"nrc\": \"20009-9\", \"nombre\": \"Jaguar Security S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
+(85, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-08-21 00:46:17');
 
 -- --------------------------------------------------------
 
@@ -192,6 +202,9 @@ CREATE TABLE IF NOT EXISTS `clientes` (
   `contacto` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `telefono` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email` varchar(160) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clave_hacienda` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clave_planilla` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contador` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `direccion` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -199,23 +212,23 @@ CREATE TABLE IF NOT EXISTS `clientes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_clientes_ident` (`nit`,`nrc`),
   KEY `idx_clientes_nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `clientes`
 --
 
-INSERT INTO `clientes` (`id`, `nombre`, `nit`, `nrc`, `contacto`, `telefono`, `email`, `direccion`, `activo`, `creado_en`, `actualizado_en`) VALUES
-(1, 'Aurora Logistics S.A. de C.V.', '0614-100101-001-0', '20001-1', 'Ana Pérez', '+503 2222 1001', 'contacto@auroralog.com', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', NULL),
-(2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', NULL),
-(3, 'Cobalto Foods S.A. de C.V.', '0614-100303-003-2', '20003-3', 'Carla Ramos', '+503 2222 3003', 'finanzas@cobaltofoods.com', 'Santa Tecla, La Libertad', 1, '2025-08-18 23:39:07', NULL),
-(4, 'Eclipse Retail S.A. de C.V.', '0614-100404-004-3', '20004-4', 'Eduardo Molina', '+503 2222 4004', 'contacto@eclipseretail.com', 'Antiguo Cuscatlán', 1, '2025-08-18 23:39:07', NULL),
-(5, 'Fénix Agro S.A. de C.V.', '0614-100505-005-4', '20005-5', 'Fernanda Cruz', '+503 2222 5005', 'info@fenixagro.com', 'Soyapango', 1, '2025-08-18 23:39:07', NULL),
-(6, 'Galaxia Media S.A. de C.V.', '0614-100606-006-5', '20006-6', 'Gabriela Soto', '+503 2222 6006', 'contacto@galaxiamedia.com', 'Santa Tecla', 1, '2025-08-18 23:39:07', NULL),
-(7, 'Horizonte Construcciones S.A. de C.V.', '0614-100707-007-6', '20007-7', 'Héctor Pineda', '+503 2222 7007', 'proyectos@horizonte.com', 'San Miguel', 1, '2025-08-18 23:39:07', NULL),
-(8, 'Ícaro Travel S.A. de C.V.', '0614-100808-008-7', '20008-8', 'Irene Lazo', '+503 2222 8008', 'ventas@icarotravel.com', 'La Libertad', 1, '2025-08-18 23:39:07', NULL),
-(9, 'Jaguar Security S.A. de C.V.', '0614-100909-009-8', '20009-9', 'Javier Campos', '+503 2222 9009', 'operaciones@jaguarsec.com', 'San Salvador, Centro', 1, '2025-08-18 23:39:07', NULL),
-(10, 'Kappa Servicios S.A. de C.V.', '0614-101010-010-9', '20010-0', 'Karla Mejía', '+503 2222 1010', 'soporte@kappasv.com', 'Mejicanos', 1, '2025-08-18 23:39:07', NULL);
+INSERT INTO `clientes` (`id`, `nombre`, `nit`, `nrc`, `contacto`, `telefono`, `email`, `clave_hacienda`, `clave_planilla`, `contador`, `direccion`, `activo`, `creado_en`, `actualizado_en`) VALUES
+(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-01', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-08-21 00:46:17'),
+(2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'AH-BRI-2025', 'PL-BRI-02', 'Luis Herrera', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
+(3, 'Cobalto Foods S.A. de C.V.', '0614-100303-003-2', '20003-3', 'Carla Ramos', '+503 2222 3003', 'finanzas@cobaltofoods.com', 'AH-COB-2025', 'PL-COB-03', 'Carolina Gómez', 'Santa Tecla, La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
+(4, 'Eclipse Retail S.A. de C.V.', '0614-100404-004-3', '20004-4', 'Eduardo Molina', '+503 2222 4004', 'contacto@eclipseretail.com', 'AH-ECL-2025', 'PL-ECL-04', 'Eduardo Rivera', 'Antiguo Cuscatlán', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
+(5, 'Fénix Agro S.A. de C.V.', '0614-100505-005-4', '20005-5', 'Fernanda Cruz', '+503 2222 5005', 'info@fenixagro.com', 'AH-FEN-2025', 'PL-FEN-05', 'Fernanda Soto', 'Soyapango', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
+(6, 'Galaxia Media S.A. de C.V.', '0614-100606-006-5', '20006-6', 'Gabriela Soto', '+503 2222 6006', 'contacto@galaxiamedia.com', 'AH-GAL-2025', 'PL-GAL-06', 'Gabriela Núñez', 'Santa Tecla', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
+(7, 'Horizonte Construcciones S.A. de C.V.', '0614-100707-007-6', '20007-7', 'Héctor Pineda', '+503 2222 7007', 'proyectos@horizonte.com', 'AH-HOR-2025', 'PL-HOR-07', 'Héctor Ramos', 'San Miguel', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
+(8, 'Ícaro Travel S.A. de C.V.', '0614-100808-008-7', '20008-8', 'Irene Lazo', '+503 2222 8008', 'ventas@icarotravel.com', 'AH-ICA-2025', 'PL-ICA-08', 'Irene Morales', 'La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
+(9, 'Jaguar Security S.A. de C.V.', '0614-100909-009-8', '20009-9', 'Javier Campos', '+503 2222 9009', 'operaciones@jaguarsec.com', 'AH-JAG-2025', 'PL-JAG-09', 'Javier Pineda', 'San Salvador, Centro', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
+(10, 'Kappa Servicios S.A. de C.V.', '0614-101010-010-9', '20010-0', 'Karla Mejía', '+503 2222 1010', 'soporte@kappasv.com', NULL, NULL, NULL, 'Mejicanos', 1, '2025-08-18 23:39:07', NULL);
 
 --
 -- Disparadores `clientes`
@@ -497,7 +510,7 @@ CREATE TABLE IF NOT EXISTS `tipos_formulario` (
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `codigo` (`codigo`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `tipos_formulario`
