@@ -9,7 +9,9 @@ $DB_USER='root';
 $DB_PASS=''; // <--- AJUSTA
 
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
-
+$rowsPerPage = 10; // Número de filas por página
+$currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($currentPage - 1) * $rowsPerPage;
 try {
   $pdo = new PDO(
     "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4",
@@ -17,6 +19,17 @@ try {
     [ PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ]
   );
 
+  $countSql = "
+    SELECT COUNT(DISTINCT c.id, per.anio, per.mes) as total
+    FROM clientes c
+    LEFT JOIN periodos per ON per.cliente_id=c.id
+    LEFT JOIN presentaciones p ON p.periodo_id=per.id
+    LEFT JOIN tipos_formulario tf ON tf.id=p.tipo_formulario_id
+    WHERE per.anio IS NOT NULL AND per.mes IS NOT NULL
+  ";
+  $totalResult = $pdo->query($countSql)->fetch(PDO::FETCH_ASSOC);
+  $totalRows = $totalResult['total'];
+  $totalPages = ceil($totalRows / $rowsPerPage);
   /*
    * Estados:
    *  - IVA:      pagado -> 'pagada'; presentado -> 'presentada'; si no -> 'pendiente'
@@ -30,10 +43,13 @@ try {
       c.id   AS cliente_id,
       c.nombre AS cliente_nombre,
       c.nit, c.contacto, c.telefono, c.email,
-      c.clave_hacienda,            -- NUEVO: desde clientes
-      c.clave_planilla,            -- NUEVO: desde clientes
-      c.contador,                  -- NUEVO: desde clientes
+      c.clave_hacienda,
+      c.clave_planilla,
+      c.contador,
       per.anio, per.mes,
+
+      -- Determina si es cliente nuevo (sin periodos)
+      CASE WHEN per.id IS NULL THEN 1 ELSE 0 END AS cliente_nuevo,
 
       MAX(CASE WHEN tf.codigo='IVA'
            THEN CASE WHEN p.pagado=1 THEN 'pagada'
@@ -57,12 +73,13 @@ try {
     LEFT JOIN presentaciones p    ON p.periodo_id=per.id
     LEFT JOIN tipos_formulario tf ON tf.id=p.tipo_formulario_id
 
-    WHERE 1=1
+    WHERE per.anio IS NOT NULL AND per.mes IS NOT NULL
     GROUP BY
       c.id, c.nombre, c.nit, c.contacto, c.telefono, c.email,
       c.clave_hacienda, c.clave_planilla, c.contador,
       per.anio, per.mes
     ORDER BY per.anio DESC, per.mes DESC, c.nombre ASC
+    LIMIT $offset, $rowsPerPage
   ";
   $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -77,6 +94,67 @@ function fechaPeriodo($anio,$mes){
   if (!$anio || !$mes) return '';
   return sprintf('%04d-%02d-01',(int)$anio,(int)$mes);
 }
+// Función para generar enlaces de paginación
+function generatePaginationLinks($currentPage, $totalPages, $maxLinks = 5) {
+  $links = [];
+  
+  // Calcular el rango de páginas a mostrar
+  $start = max(1, $currentPage - floor($maxLinks / 2));
+  $end = min($totalPages, $start + $maxLinks - 1);
+  
+  // Ajustar el inicio si estamos cerca del final
+  if ($end - $start + 1 < $maxLinks) {
+    $start = max(1, $end - $maxLinks + 1);
+  }
+  
+  // Botón anterior
+  if ($currentPage > 1) {
+    $links[] = [
+      'page' => $currentPage - 1,
+      'label' => '&laquo;',
+      'class' => '',
+      'disabled' => false
+    ];
+  } else {
+    $links[] = [
+      'page' => 1,
+      'label' => '&laquo;',
+      'class' => 'disabled',
+      'disabled' => true
+    ];
+  }
+  
+  // Páginas numeradas
+  for ($i = $start; $i <= $end; $i++) {
+    $links[] = [
+      'page' => $i,
+      'label' => $i,
+      'class' => $i == $currentPage ? 'active' : '',
+      'disabled' => false
+    ];
+  }
+  
+  // Botón siguiente
+  if ($currentPage < $totalPages) {
+    $links[] = [
+      'page' => $currentPage + 1,
+      'label' => '&raquo;',
+      'class' => '',
+      'disabled' => false
+    ];
+  } else {
+    $links[] = [
+      'page' => $totalPages,
+      'label' => '&raquo;',
+      'class' => 'disabled',
+      'disabled' => true
+    ];
+  }
+  
+  return $links;
+}
+
+$paginationLinks = generatePaginationLinks($currentPage, $totalPages);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -215,7 +293,7 @@ function fechaPeriodo($anio,$mes){
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                             <tbody class="bg-white divide-y divide-gray-200">
                                 <?php if (!empty($rows)): ?>
                                   <?php foreach ($rows as $r): 
                                     if (!$r['anio'] || !$r['mes']) continue;
@@ -261,22 +339,25 @@ function fechaPeriodo($anio,$mes){
                         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                             <div>
                                 <p class="text-sm text-gray-700">
-                                    Mostrando <span class="font-medium"><?=h((string)count($rows))?></span> resultado(s)
+                                    Mostrando <span class="font-medium"><?=($offset + 1)?>-<?=min($offset + $rowsPerPage, $totalRows)?></span> de <span class="font-medium"><?=$totalRows?></span> resultado(s)
                                 </p>
                             </div>
                             <div>
                                 <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                    <a class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500">
-                                        <span class="sr-only">Anterior</span>
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                    <a aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</a>
-                                    <a class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">2</a>
-                                    <a class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text sm font-medium">3</a>
-                                    <a class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Siguiente</span>
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
+                                    <?php foreach ($paginationLinks as $link): ?>
+                                        <?php if ($link['label'] == '&laquo;' || $link['label'] == '&raquo;'): ?>
+                                            <a href="?page=<?=$link['page']?>" 
+                                               class="pagination-link relative inline-flex items-center px-2 py-2 rounded-<?=$link['label'] == '&laquo;' ? 'l' : 'r'?>-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 <?=$link['class'] ? 'disabled' : ''?>">
+                                                <span class="sr-only"><?=$link['label'] == '&laquo;' ? 'Anterior' : 'Siguiente'?></span>
+                                                <?=$link['label']?>
+                                            </a>
+                                        <?php else: ?>
+                                            <a href="?page=<?=$link['page']?>" 
+                                               class="pagination-link relative inline-flex items-center px-4 py-2 border text-sm font-medium <?=$link['class'] == 'active' ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'?>">
+                                                <?=$link['label']?>
+                                            </a>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
                                 </nav>
                             </div>
                         </div>
@@ -493,8 +574,9 @@ function fechaPeriodo($anio,$mes){
       applyFilter();
     })();
     </script>
-  <!-- Scrip de onclik -->
-  <script>
+    
+    <!-- Script para resaltar la página activa en el menú -->
+    <script>
     const currentPage = window.location.pathname.split("/").pop();
 
     document.querySelectorAll(".sidebar-item").forEach(item => {
@@ -505,6 +587,6 @@ function fechaPeriodo($anio,$mes){
             item.classList.remove("active"); 
         }
     });
-</script>
+    </script>
 </body>
 </html>
