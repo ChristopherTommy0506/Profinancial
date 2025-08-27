@@ -9,9 +9,12 @@ $DB_USER='root';
 $DB_PASS=''; // <--- AJUSTA
 
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+
+// Configuración de paginación
 $rowsPerPage = 10; // Número de filas por página
 $currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($currentPage - 1) * $rowsPerPage;
+
 try {
   $pdo = new PDO(
     "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4",
@@ -19,6 +22,7 @@ try {
     [ PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ]
   );
 
+  // Consulta para obtener el total de registros
   $countSql = "
     SELECT COUNT(DISTINCT c.id, per.anio, per.mes) as total
     FROM clientes c
@@ -30,6 +34,7 @@ try {
   $totalResult = $pdo->query($countSql)->fetch(PDO::FETCH_ASSOC);
   $totalRows = $totalResult['total'];
   $totalPages = ceil($totalRows / $rowsPerPage);
+
   /*
    * Estados:
    *  - IVA:      pagado -> 'pagada'; presentado -> 'presentada'; si no -> 'pendiente'
@@ -38,6 +43,8 @@ try {
    *  - CONTAB:   (presentado OR pagado) -> 'realizado'; si no -> 'pendiente'
    * Mapea columna "PA" del front a código 'RENTA' de la BD.
    */
+  
+  // Consulta principal con paginación
   $sql = "
     SELECT
       c.id   AS cliente_id,
@@ -94,67 +101,6 @@ function fechaPeriodo($anio,$mes){
   if (!$anio || !$mes) return '';
   return sprintf('%04d-%02d-01',(int)$anio,(int)$mes);
 }
-// Función para generar enlaces de paginación
-function generatePaginationLinks($currentPage, $totalPages, $maxLinks = 5) {
-  $links = [];
-  
-  // Calcular el rango de páginas a mostrar
-  $start = max(1, $currentPage - floor($maxLinks / 2));
-  $end = min($totalPages, $start + $maxLinks - 1);
-  
-  // Ajustar el inicio si estamos cerca del final
-  if ($end - $start + 1 < $maxLinks) {
-    $start = max(1, $end - $maxLinks + 1);
-  }
-  
-  // Botón anterior
-  if ($currentPage > 1) {
-    $links[] = [
-      'page' => $currentPage - 1,
-      'label' => '&laquo;',
-      'class' => '',
-      'disabled' => false
-    ];
-  } else {
-    $links[] = [
-      'page' => 1,
-      'label' => '&laquo;',
-      'class' => 'disabled',
-      'disabled' => true
-    ];
-  }
-  
-  // Páginas numeradas
-  for ($i = $start; $i <= $end; $i++) {
-    $links[] = [
-      'page' => $i,
-      'label' => $i,
-      'class' => $i == $currentPage ? 'active' : '',
-      'disabled' => false
-    ];
-  }
-  
-  // Botón siguiente
-  if ($currentPage < $totalPages) {
-    $links[] = [
-      'page' => $currentPage + 1,
-      'label' => '&raquo;',
-      'class' => '',
-      'disabled' => false
-    ];
-  } else {
-    $links[] = [
-      'page' => $totalPages,
-      'label' => '&raquo;',
-      'class' => 'disabled',
-      'disabled' => true
-    ];
-  }
-  
-  return $links;
-}
-
-$paginationLinks = generatePaginationLinks($currentPage, $totalPages);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -169,6 +115,38 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
         .sidebar-item.active { background-color: #eef2ff; color: #4f46e5; border-left: 3px solid #4f46e5; }
         .search-box:focus { box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
         select:disabled { opacity: 0.6; cursor: not-allowed; }
+        .pagination-link { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 0.75rem;
+            margin: 0 -1px;
+            text-decoration: none;
+            color: #6b7280;
+        }
+        .pagination-link:hover { 
+            background-color: #f9fafb;
+        }
+        .pagination-link.active { 
+            background-color: #eef2ff; 
+            border-color: #4f46e5; 
+            color: #4f46e5; 
+            z-index: 10;
+        }
+        .pagination-link.disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+            background-color: #f3f4f6;
+        }
+        .estado-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -257,9 +235,9 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
                             <option value="">Todos</option>
                         </select>
 
-                        <!-- Modo: filtrar -->
-                        <label class="inline-flex items-center gap-2 text-sm">
-                            <input id="chkFiltrar" type="checkbox" class="rounded border-gray-300" checked>
+                        <!-- Modo: filtrar - CORREGIDO: desactivado por defecto -->
+                        <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                            <input id="chkFiltrar" type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                             Filtrar solo coincidentes
                         </label>
                     </div>
@@ -293,7 +271,7 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
                                 </tr>
                             </thead>
-                             <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white divide-y divide-gray-200">
                                 <?php if (!empty($rows)): ?>
                                   <?php foreach ($rows as $r): 
                                     if (!$r['anio'] || !$r['mes']) continue;
@@ -335,33 +313,65 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
                             </tbody>
                         </table>
                     </div>
-                    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    
+                    <!-- PAGINACIÓN SIMPLIFICADA Y FUNCIONAL -->
+                    <?php if ($totalPages > 1): ?>
+                    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
+                        <div class="flex-1 flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-700">
-                                    Mostrando <span class="font-medium"><?=($offset + 1)?>-<?=min($offset + $rowsPerPage, $totalRows)?></span> de <span class="font-medium"><?=$totalRows?></span> resultado(s)
+                                    Mostrando <span class="font-medium"><?=($offset + 1)?></span> a <span class="font-medium"><?=min($offset + $rowsPerPage, $totalRows)?></span> de <span class="font-medium"><?=$totalRows?></span> resultados
                                 </p>
                             </div>
                             <div>
-                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                    <?php foreach ($paginationLinks as $link): ?>
-                                        <?php if ($link['label'] == '&laquo;' || $link['label'] == '&raquo;'): ?>
-                                            <a href="?page=<?=$link['page']?>" 
-                                               class="pagination-link relative inline-flex items-center px-2 py-2 rounded-<?=$link['label'] == '&laquo;' ? 'l' : 'r'?>-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 <?=$link['class'] ? 'disabled' : ''?>">
-                                                <span class="sr-only"><?=$link['label'] == '&laquo;' ? 'Anterior' : 'Siguiente'?></span>
-                                                <?=$link['label']?>
-                                            </a>
-                                        <?php else: ?>
-                                            <a href="?page=<?=$link['page']?>" 
-                                               class="pagination-link relative inline-flex items-center px-4 py-2 border text-sm font-medium <?=$link['class'] == 'active' ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'?>">
-                                                <?=$link['label']?>
-                                            </a>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
+                                <nav class="inline-flex rounded-md shadow-sm">
+                                    <!-- Botón Anterior -->
+                                    <?php if ($currentPage > 1): ?>
+                                        <a href="?page=<?=$currentPage - 1?>" class="pagination-link relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Anterior</span>
+                                            <i class="fas fa-chevron-left w-4 h-4"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="pagination-link disabled relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                                            <span class="sr-only">Anterior</span>
+                                            <i class="fas fa-chevron-left w-4 h-4"></i>
+                                        </span>
+                                    <?php endif; ?>
+
+                                    <!-- Números de página -->
+                                    <?php
+                                    // Mostrar máximo 5 páginas alrededor de la actual
+                                    $startPage = max(1, $currentPage - 2);
+                                    $endPage = min($totalPages, $startPage + 4);
+                                    
+                                    // Ajustar si estamos cerca del final
+                                    if ($endPage - $startPage < 4) {
+                                        $startPage = max(1, $endPage - 4);
+                                    }
+                                    
+                                    for ($i = $startPage; $i <= $endPage; $i++): ?>
+                                        <a href="?page=<?=$i?>" class="pagination-link relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium <?=($i == $currentPage) ? 'active text-indigo-600' : 'text-gray-500 hover:bg-gray-50'?>">
+                                            <?=$i?>
+                                        </a>
+                                    <?php endfor; ?>
+
+                                    <!-- Botón Siguiente -->
+                                    <?php if ($currentPage < $totalPages): ?>
+                                        <a href="?page=<?=$currentPage + 1?>" class="pagination-link relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Siguiente</span>
+                                            <i class="fas fa-chevron-right w-4 h-4"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="pagination-link disabled relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                                            <span class="sr-only">Siguiente</span>
+                                            <i class="fas fa-chevron-right w-4 h-4"></i>
+                                        </span>
+                                    <?php endif; ?>
                                 </nav>
                             </div>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
             </main>
         </div>
@@ -385,7 +395,7 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
           <div><span class="block text-gray-500 font-semibold">Contacto:</span><span class="block text-gray-900">—</span></div>
           <div><span class="block text-gray-500 font-semibold">Teléfono:</span><span class="block text-gray-900">—</span></div>
           <div><span class="block text-gray-500 font-semibold">Correo:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text-gray-500 font-semibold">Contador:</span><span class="block text-gray-900">—</span></div>
+          <div><span class="block text gray-500 font-semibold">Contador:</span><span class="block text-gray-900">—</span></div>
         </div>
 
         <div class="mt-5">
@@ -479,7 +489,7 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
         const years = new Set();
         tbody.querySelectorAll("tr").forEach(tr => {
           const f = tr.getAttribute("data-fecha");
-          if (f && /^\\d{4}-\\d{2}-\\d{2}$/.test(f)) years.add(parseInt(f.slice(0,4), 10));
+          if (f && /^\d{4}-\d{2}-\d{2}$/.test(f)) years.add(parseInt(f.slice(0,4), 10));
         });
         return Array.from(years).sort((a,b)=>b-a);
       }
@@ -520,6 +530,7 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
           const matchesText = q ? row.innerText.toLowerCase().includes(q) : true;
 
           let matchesState = true;
+          // CORREGIDO: Solo aplicar filtro de estado si el checkbox está marcado
           if ($chkFiltrar.checked && estadoSel) {
             const val = norm(row.getAttribute(`data-${apartado}`) || "");
             matchesState = (val === estadoSel);
@@ -527,7 +538,7 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
 
           let matchesPeriod = true;
           const f = row.getAttribute("data-fecha");
-          if (f && /^\\d{4}-\\d{2}-\\d{2}$/.test(f)) {
+          if (f && /^\d{4}-\d{2}-\d{2}$/.test(f)) {
             const yr = parseInt(f.slice(0,4), 10);
             const mo = parseInt(f.slice(5,7), 10);
             const dy = parseInt(f.slice(8,10), 10);
@@ -571,7 +582,7 @@ $paginationLinks = generatePaginationLinks($currentPage, $totalPages);
       fillAnios();
       fillMeses(false);
       fillDias(false);
-      applyFilter();
+      // CORREGIDO: No aplicar filtro automáticamente al cargar la página
     })();
     </script>
     
