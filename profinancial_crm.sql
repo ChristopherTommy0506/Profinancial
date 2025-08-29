@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 29-08-2025 a las 22:19:03
+-- Tiempo de generación: 29-08-2025 a las 23:31:52
 -- Versión del servidor: 9.1.0
 -- Versión de PHP: 8.3.14
 
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `bitacora_actividad` (
   KEY `idx_bitacora_usuario` (`usuario_id`),
   KEY `idx_bitacora_accion` (`accion`),
   KEY `idx_bitacora_entidad` (`entidad`,`entidad_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `bitacora_actividad`
@@ -189,7 +189,12 @@ INSERT INTO `bitacora_actividad` (`id`, `usuario_id`, `accion`, `entidad`, `enti
 (86, NULL, 'CREAR_CLIENTE', 'clientes', 12, '{\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan\"}', NULL, '2025-08-29 20:52:31'),
 (87, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 12, '{\"antes\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan\"}, \"despues\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan\"}}', NULL, '2025-08-29 21:35:40'),
 (88, NULL, 'CREAR_CLIENTE', 'clientes', 13, '{\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}', NULL, '2025-08-29 21:45:42'),
-(89, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 5, '{\"antes\": {\"nit\": \"0614-100505-005-4\", \"nrc\": \"20005-5\", \"nombre\": \"Fénix Agro S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100505-005-4\", \"nrc\": \"20005-5\", \"nombre\": \"Fénix Agro S.A. de C.V.\"}}', NULL, '2025-08-29 22:15:08');
+(89, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 5, '{\"antes\": {\"nit\": \"0614-100505-005-4\", \"nrc\": \"20005-5\", \"nombre\": \"Fénix Agro S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100505-005-4\", \"nrc\": \"20005-5\", \"nombre\": \"Fénix Agro S.A. de C.V.\"}}', NULL, '2025-08-29 22:15:08'),
+(90, NULL, 'CREAR_CLIENTE', 'clientes', 14, '{\"nit\": \"017026309\", \"nrc\": \"253263269\", \"nombre\": \"Julio\"}', NULL, '2025-08-29 22:52:24'),
+(91, NULL, 'CREAR_CLIENTE', 'clientes', 15, '{\"nit\": \"017026360\", \"nrc\": \"253263269\", \"nombre\": \"Julio\"}', NULL, '2025-08-29 23:01:49'),
+(92, NULL, 'CREAR_CLIENTE', 'clientes', 16, '{\"nit\": \"01702630000\", \"nrc\": \"25326326\", \"nombre\": \"Julio\"}', NULL, '2025-08-29 23:05:51'),
+(93, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-08-29 23:19:23'),
+(94, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-08-29 23:19:24');
 
 -- --------------------------------------------------------
 
@@ -213,10 +218,10 @@ CREATE TABLE IF NOT EXISTS `clientes` (
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_en` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `declaracion_iva` enum('documento pendiente','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
-  `declaracion_pa` enum('documento pendiente','realizado') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
-  `declaracion_planilla` enum('documento pendiente','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
-  `declaracion_contabilidad` enum('pendiente de procesar','en proceso','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'pendiente de procesar',
+  `declaracion_iva` enum('documento pendiente','pendiente de procesar','en proceso','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
+  `declaracion_pa` enum('documento pendiente','pendiente de procesar','en proceso','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
+  `declaracion_planilla` enum('documento pendiente','pendiente de procesar','en proceso','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
+  `declaracion_contabilidad` enum('pendiente de procesar','en proceso','presentada') COLLATE utf8mb4_unicode_ci DEFAULT 'pendiente de procesar',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_clientes_ident` (`nit`,`nrc`),
   KEY `idx_clientes_nombre` (`nombre`),
@@ -224,14 +229,14 @@ CREATE TABLE IF NOT EXISTS `clientes` (
   KEY `idx_declaracion_pa` (`declaracion_pa`),
   KEY `idx_declaracion_planilla` (`declaracion_planilla`),
   KEY `idx_declaracion_contabilidad` (`declaracion_contabilidad`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `clientes`
 --
 
 INSERT INTO `clientes` (`id`, `nombre`, `nit`, `nrc`, `contacto`, `telefono`, `email`, `clave_hacienda`, `clave_planilla`, `contador`, `direccion`, `activo`, `creado_en`, `actualizado_en`, `declaracion_iva`, `declaracion_pa`, `declaracion_planilla`, `declaracion_contabilidad`) VALUES
-(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-01', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-08-21 00:46:17', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-01', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-08-29 23:19:24', 'presentada', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'AH-BRI-2025', 'PL-BRI-02', 'Luis Herrera', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (3, 'Cobalto Foods S.A. de C.V.', '0614-100303-003-2', '20003-3', 'Carla Ramos', '+503 2222 3003', 'finanzas@cobaltofoods.com', 'AH-COB-2025', 'PL-COB-03', 'Carolina Gómez', 'Santa Tecla, La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (4, 'Eclipse Retail S.A. de C.V.', '0614-100404-004-3', '20004-4', 'Eduardo Molina', '+503 2222 4004', 'contacto@eclipseretail.com', 'AH-ECL-2025', 'PL-ECL-04', 'Eduardo Rivera', 'Antiguo Cuscatlán', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
@@ -242,7 +247,10 @@ INSERT INTO `clientes` (`id`, `nombre`, `nit`, `nrc`, `contacto`, `telefono`, `e
 (9, 'Jaguar Security S.A. de C.V.', '0614-100909-009-8', '20009-9', 'Javier Campos', '+503 2222 9009', 'operaciones@jaguarsec.com', 'AH-JAG-2025', 'PL-JAG-09', 'Javier Pineda', 'San Salvador, Centro', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (10, 'Kappa Servicios S.A. de C.V.', '0614-101010-010-9', '20010-0', 'Karla Mejía', '+503 2222 1010', 'soporte@kappasv.com', NULL, NULL, NULL, 'Mejicanos', 1, '2025-08-18 23:39:07', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (12, 'Juan', '01702630', '25326326', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170291', 'Jose', 'Calle', 1, '2025-08-29 20:52:31', '2025-08-29 21:35:40', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(13, 'tommy', '017026300', '253263260', 'messi', '75747039', 'jr@gmail.com', '20170295', '20170295', 'Jose', 'Colonia Zacamil', 1, '2025-08-29 21:45:42', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar');
+(13, 'tommy', '017026300', '253263260', 'messi', '75747039', 'jr@gmail.com', '20170295', '20170295', 'Jose', 'Colonia Zacamil', 1, '2025-08-29 21:45:42', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(14, 'Julio', '017026309', '253263269', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170293', 'Jose', 'Calle', 1, '2025-08-29 22:52:24', NULL, 'presentada', 'presentada', 'pagada', ''),
+(15, 'Julio', '017026360', '253263269', 'messi', '75747039', 'jr@gmail.com', '20354982', '20354982', 'Jose', 'Calle', 1, '2025-08-29 23:01:49', NULL, 'presentada', 'presentada', 'presentada', 'en proceso'),
+(16, 'Julio', '01702630000', '25326326', 'messi', '75747039', 'jr@gmail.com', '2', '2', 'Jose', 'Calle', 1, '2025-08-29 23:05:51', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', '');
 
 --
 -- Disparadores `clientes`
@@ -315,7 +323,7 @@ CREATE TABLE IF NOT EXISTS `periodos` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_periodo` (`cliente_id`,`anio`,`mes`),
   KEY `idx_periodo_anio_mes` (`anio`,`mes`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Volcado de datos para la tabla `periodos`
@@ -333,7 +341,10 @@ INSERT INTO `periodos` (`id`, `cliente_id`, `anio`, `mes`, `creado_en`) VALUES
 (9, 9, 2025, 7, '2025-08-18 23:39:07'),
 (10, 10, 2025, 7, '2025-08-18 23:39:07'),
 (11, 12, 2025, 8, '2025-08-29 21:06:13'),
-(12, 13, 2025, 8, '2025-08-29 21:45:42');
+(12, 13, 2025, 8, '2025-08-29 21:45:42'),
+(13, 14, 2025, 8, '2025-08-29 22:52:24'),
+(14, 15, 2025, 8, '2025-08-29 23:01:49'),
+(15, 16, 2025, 8, '2025-08-29 23:05:51');
 
 -- --------------------------------------------------------
 
