@@ -161,7 +161,7 @@ function fechaPeriodo($anio,$mes){
         <div class="hidden md:flex flex-col w-64 bg-white border-r">
             <div class="flex items-center h-16 px-4 bg-indigo-600">
                 <div class="flex items-center">
-                    <img src="https://placehold.co/30x30" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
+                    <img src="../multimedia/Logo PROFINANCIAL.png" alt="Logo Profinancial" class="h-8 w-8 rounded-full bg-white p-1">
                     <span class="ml-2 text-white font-bold">Profinancial</span>
                 </div>
             </div>
