@@ -46,99 +46,65 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
 
     if ($action==='update_estados') {
       $cliente_id = (int)($_POST['id'] ?? 0);
-      $anio = (int)($_POST['anio'] ?? 0);
-      $mes  = (int)($_POST['mes'] ?? 0);
-      if ($cliente_id<=0 || $anio<=0 || $mes<=0) throw new Exception("Período requerido para actualizar estados.");
+      if ($cliente_id<=0) throw new Exception("ID de cliente requerido.");
 
-      // Estados recibidos (opcionales)
+      // Estados recibidos (opcionales) - mapeados a las columnas correctas de la tabla clientes
       $estado = [
-        'IVA'      => $_POST['iva']      ?? null,
-        'RENTA'    => $_POST['pa']       ?? null, // mapeamos PA->RENTA
-        'PLANILLA' => $_POST['planilla'] ?? null,
-        'CONTAB'   => $_POST['conta']    ?? null,
+        'declaracion_iva' => $_POST['iva'] ?? null,
+        'declaracion_pa' => $_POST['pa'] ?? null,
+        'declaracion_planilla' => $_POST['planilla'] ?? null,
+        'declaracion_contabilidad' => $_POST['conta'] ?? null,
       ];
 
-      $pdo->beginTransaction();
-
-      // 1) Asegurar período
-      $stmt = $pdo->prepare("SELECT id FROM periodos WHERE cliente_id=? AND anio=? AND mes=?");
-      $stmt->execute([$cliente_id,$anio,$mes]);
-      $periodo_id = (int)($stmt->fetchColumn() ?: 0);
-      if ($periodo_id===0){
-        $pdo->prepare("INSERT INTO periodos (cliente_id, anio, mes) VALUES (?,?,?)")
-            ->execute([$cliente_id,$anio,$mes]);
-        $periodo_id = (int)$pdo->lastInsertId();
-      }
-
-      // 2) Obtener IDs de tipos_formulario por código
-      $needCodes = array_keys($estado);
-      $in = implode(",", array_fill(0,count($needCodes), "?"));
-      $st = $pdo->prepare("SELECT id,codigo FROM tipos_formulario WHERE codigo IN ($in)");
-      $st->execute($needCodes);
-      $tf = $st->fetchAll(PDO::FETCH_KEY_PAIR); // [codigo => id]
-
-      // Si faltan códigos, tratamos de crearlos mínimamente
-      foreach ($needCodes as $code){
-        if (!isset($tf[$code])){
-          $pdo->prepare("INSERT INTO tipos_formulario (codigo, nombre) VALUES (?, ?)")
-              ->execute([$code, ucfirst(strtolower($code))]);
-          $tf[$code]=(int)$pdo->lastInsertId();
-        }
-      }
-
-      // 3) Upsert presentaciones según estado elegido
-      $sel = $pdo->prepare("SELECT id FROM presentaciones WHERE periodo_id=? AND tipo_formulario_id=?");
-      $ins = $pdo->prepare("INSERT INTO presentaciones (periodo_id, tipo_formulario_id, presentado, pagado) VALUES (?,?,?,?)");
-      $upd = $pdo->prepare("UPDATE presentaciones SET presentado=?, pagado=? WHERE id=?");
-
-      // Helper para convertir estado -> (presentado,pagado)
-      $toFlags = function(string $code, ?string $val): ?array {
-        if ($val===null) return null;
+      // Mapear los valores simples a los valores permitidos en la base de datos
+      $mapEstado = function($tipo, $val) {
+        if ($val === null) return null;
+        
         $v = strtolower(trim($val));
-        switch ($code) {
-          case 'IVA':
+        switch ($tipo) {
+          case 'declaracion_iva':
             // pendiente | presentada | pagada
-            if ($v==='pagada')     return [1,1];
-            if ($v==='presentada') return [1,0];
-            return [0,0]; // pendiente
-          case 'RENTA': // PA
-            // pendiente | realizado
-            if ($v==='realizado')  return [1,0];
-            return [0,0];
-          case 'PLANILLA':
+            if ($v==='pagada') return 'pagada';
+            if ($v==='presentada') return 'presentada';
+            return 'documento pendiente';
+          case 'declaracion_pa':
+            // pendiente | realizado -> mapeamos a los valores de la BD
+            if ($v==='realizado') return 'presentada';
+            return 'documento pendiente';
+          case 'declaracion_planilla':
             // pendiente | pagada
-            if ($v==='pagada')     return [0,1];
-            return [0,0];
-          case 'CONTAB':
-            // pendiente | realizado
-            if ($v==='realizado')  return [1,0];
-            return [0,0];
+            if ($v==='pagada') return 'pagada';
+            return 'documento pendiente';
+          case 'declaracion_contabilidad':
+            // pendiente | realizado -> mapeamos a los valores de la BD
+            if ($v==='realizado') return 'presentada';
+            return 'pendiente de procesar';
         }
-        return [0,0];
+        return null;
       };
 
-      foreach ($estado as $code=>$val){
-        if ($val===null) continue; // no actualizar si no vino
-        [$presentado,$pagado] = $toFlags($code,$val);
-        $tfid = (int)$tf[$code];
-
-        $sel->execute([$periodo_id,$tfid]);
-        $pid = (int)($sel->fetchColumn() ?: 0);
-        if ($pid===0){
-          $ins->execute([$periodo_id,$tfid,$presentado,$pagado]);
-        } else {
-          $upd->execute([$presentado,$pagado,$pid]);
+      $sets=[]; $vals=[];
+      foreach ($estado as $col=>$val){
+        if ($val!==null){
+          $mappedVal = $mapEstado($col, $val);
+          if ($mappedVal !== null) {
+            $sets[]="{$col}=?";
+            $vals[]=$mappedVal;
+          }
         }
       }
-
-      $pdo->commit();
+      
+      if (!$sets) throw new Exception("Nada que actualizar.");
+      $vals[]=$cliente_id;
+      $sql="UPDATE clientes SET ".implode(",",$sets)." WHERE id=?";
+      $pdo->prepare($sql)->execute($vals);
+      
       echo json_encode(['ok'=>true,'msg'=>'Estados actualizados']); exit;
     }
 
     echo json_encode(['ok'=>false,'msg'=>'Acción no soportada.']); exit;
 
   } catch (Throwable $e) {
-    if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
     http_response_code(400);
     echo json_encode(['ok'=>false,'msg'=>$e->getMessage()]); exit;
   }
@@ -151,7 +117,7 @@ $mes  = isset($_GET['mes'])  && $_GET['mes']  !=='' ? (int)$_GET['mes']  : null;
 try {
   $pdo = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4",$DB_USER,$DB_PASS,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
 
-  // Años y meses para combos
+  // Años y meses para combos (de la tabla periodos)
   $years = $pdo->query("SELECT DISTINCT anio FROM periodos ORDER BY anio DESC")->fetchAll(PDO::FETCH_COLUMN);
   $months = [];
   if ($anio){
@@ -160,93 +126,28 @@ try {
     $months = $stm->fetchAll(PDO::FETCH_COLUMN);
   }
 
-  // SQL consolidado (mismas reglas que antes)
-  $params = [];
-  if ($anio && $mes){
-    $sql = "
-      SELECT c.id, c.nombre AS cliente_nombre, c.nit, c.contacto, c.telefono, c.email,
-             c.contador, c.clave_hacienda, c.clave_planilla,
-             MAX(per.anio) anio, MAX(per.mes) mes,
-             MAX(CASE WHEN tf.codigo='IVA' THEN CASE WHEN p.pagado=1 THEN 'pagada'
-                                                     WHEN p.presentado=1 THEN 'presentada'
-                                                     ELSE 'pendiente' END END) AS iva,
-             MAX(CASE WHEN tf.codigo IN ('RENTA','PA') THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
-                                                                 ELSE 'pendiente' END END) AS pa,
-             MAX(CASE WHEN tf.codigo='PLANILLA' THEN CASE WHEN p.pagado=1 THEN 'pagada'
-                                                          ELSE 'pendiente' END END) AS planilla,
-             MAX(CASE WHEN tf.codigo IN ('CONTAB','CONTABILIDAD') THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
-                                                                            ELSE 'pendiente' END END) AS conta
-      FROM clientes c
-      LEFT JOIN periodos per ON per.cliente_id=c.id AND per.anio=? AND per.mes=?
-      LEFT JOIN presentaciones p ON p.periodo_id=per.id
-      LEFT JOIN tipos_formulario tf ON tf.id=p.tipo_formulario_id
-      GROUP BY c.id
-      ORDER BY c.nombre ASC
-    ";
-    $params = [$anio,$mes];
-  } elseif ($anio){
-    $sql = "
-      SELECT c.id, c.nombre AS cliente_nombre, c.nit, c.contacto, c.telefono, c.email,
-             c.contador, c.clave_hacienda, c.clave_planilla,
-             MAX(per.anio) anio, MAX(per.mes) mes,
-             MAX(CASE WHEN tf.codigo='IVA' THEN CASE WHEN p.pagado=1 THEN 'pagada'
-                                                     WHEN p.presentado=1 THEN 'presentada'
-                                                     ELSE 'pendiente' END END) AS iva,
-             MAX(CASE WHEN tf.codigo IN ('RENTA','PA') THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
-                                                                 ELSE 'pendiente' END END) AS pa,
-             MAX(CASE WHEN tf.codigo='PLANILLA' THEN CASE WHEN p.pagado=1 THEN 'pagada'
-                                                          ELSE 'pendiente' END END) AS planilla,
-             MAX(CASE WHEN tf.codigo IN ('CONTAB','CONTABILIDAD') THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
-                                                                            ELSE 'pendiente' END END) AS conta
-      FROM clientes c
-      LEFT JOIN (
-        SELECT p1.*
-        FROM periodos p1
-        JOIN (
-          SELECT cliente_id, MAX(mes) max_mes
-          FROM periodos
-          WHERE anio=?
-          GROUP BY cliente_id
-        ) t ON t.cliente_id=p1.cliente_id AND p1.anio=? AND p1.mes=t.max_mes
-      ) per ON per.cliente_id=c.id
-      LEFT JOIN presentaciones p ON p.periodo_id=per.id
-      LEFT JOIN tipos_formulario tf ON tf.id=p.tipo_formulario_id
-      GROUP BY c.id
-      ORDER BY c.nombre ASC
-    ";
-    $params = [$anio,$anio];
-  } else {
-    $sql = "
-      SELECT c.id, c.nombre AS cliente_nombre, c.nit, c.contacto, c.telefono, c.email,
-             c.contador, c.clave_hacienda, c.clave_planilla,
-             MAX(per.anio) anio, MAX(per.mes) mes,
-             MAX(CASE WHEN tf.codigo='IVA' THEN CASE WHEN p.pagado=1 THEN 'pagada'
-                                                     WHEN p.presentado=1 THEN 'presentada'
-                                                     ELSE 'pendiente' END END) AS iva,
-             MAX(CASE WHEN tf.codigo IN ('RENTA','PA') THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
-                                                                 ELSE 'pendiente' END END) AS pa,
-             MAX(CASE WHEN tf.codigo='PLANILLA' THEN CASE WHEN p.pagado=1 THEN 'pagada'
-                                                          ELSE 'pendiente' END END) AS planilla,
-             MAX(CASE WHEN tf.codigo IN ('CONTAB','CONTABILIDAD') THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
-                                                                            ELSE 'pendiente' END END) AS conta
-      FROM clientes c
-      LEFT JOIN (
-        SELECT p1.*
-        FROM periodos p1
-        JOIN (
-          SELECT cliente_id, MAX(anio*100+mes) maxym
-          FROM periodos
-          GROUP BY cliente_id
-        ) t ON t.cliente_id=p1.cliente_id AND (p1.anio*100+p1.mes)=t.maxym
-      ) per ON per.cliente_id=c.id
-      LEFT JOIN presentaciones p ON p.periodo_id=per.id
-      LEFT JOIN tipos_formulario tf ON tf.id=p.tipo_formulario_id
-      GROUP BY c.id
-      ORDER BY c.nombre ASC
-    ";
-  }
+  // SQL consolidado - ahora obtenemos los datos directamente de la tabla clientes
+  $sql = "
+    SELECT 
+      id, 
+      nombre AS cliente_nombre, 
+      nit, 
+      contacto, 
+      telefono, 
+      email,
+      contador, 
+      clave_hacienda, 
+      clave_planilla,
+      declaracion_iva AS iva,
+      declaracion_pa AS pa,
+      declaracion_planilla AS planilla,
+      declaracion_contabilidad AS conta
+    FROM clientes 
+    WHERE activo = 1
+    ORDER BY nombre ASC
+  ";
 
-  $st = $pdo->prepare($sql); $st->execute($params);
+  $st = $pdo->prepare($sql); $st->execute();
   $rows = $st->fetchAll(PDO::FETCH_ASSOC);
 
 } catch(Throwable $e){
@@ -345,17 +246,22 @@ try {
               <th class="px-4 py-2 min-w-[130px]">PA</th>
               <th class="px-4 py-2 min-w-[120px]">Planilla</th>
               <th class="px-4 py-2 min-w-[140px]">Contabilidad</th>
-              <th class="px-4 py-2 min-w-[120px]">Período</th>
               <th class="px-4 py-2 min-w-[150px]">Acciones</th>
             </tr>
           </thead>
           <tbody id="tablaClientes">
           <?php if ($rows): foreach ($rows as $r):
-              $vIva = strtolower($r['iva'] ?? 'pendiente');
-              $vPa  = strtolower($r['pa']  ?? 'pendiente');
-              $vPla = strtolower($r['planilla'] ?? 'pendiente');
-              $vCon = strtolower($r['conta'] ?? 'pendiente');
-              $periodoTxt = ($r['anio'] && $r['mes']) ? (monthName($r['mes']).' '.$r['anio']) : '-';
+              // Mapear los valores de la BD a los valores mostrados en la interfaz
+              $vIva = strtolower($r['iva'] ?? 'documento pendiente');
+              $vPa  = strtolower($r['pa']  ?? 'documento pendiente');
+              $vPla = strtolower($r['planilla'] ?? 'documento pendiente');
+              $vCon = strtolower($r['conta'] ?? 'pendiente de procesar');
+              
+              // Convertir a los valores mostrados en la interfaz
+              $displayIva = ($vIva === 'pagada') ? 'pagada' : (($vIva === 'presentada') ? 'presentada' : 'pendiente');
+              $displayPa = ($vPa === 'presentada' || $vPa === 'pagada') ? 'realizado' : 'pendiente';
+              $displayPla = ($vPla === 'pagada') ? 'pagada' : 'pendiente';
+              $displayCon = ($vCon === 'presentada') ? 'realizado' : 'pendiente';
           ?>
             <tr class="border-b" data-id="<?=h($r['id'])?>">
               <!-- celdas editables (se activan por toggle) -->
@@ -368,12 +274,12 @@ try {
               <td class="px-4 py-2 whitespace-nowrap" contenteditable="false"><?=h($r['clave_hacienda'])?></td>
               <td class="px-4 py-2 whitespace-nowrap" contenteditable="false"><?=h($r['clave_planilla'])?></td>
 
-              <!-- selects de estado (solo editables en modo edición; además, se bloquean si no hay Año+Mes) -->
+              <!-- selects de estado -->
               <td class="px-4 py-2 whitespace-nowrap">
                 <select class="estado iva border rounded px-2 py-1" disabled>
                   <?php
                     $opts=['pendiente','presentada','pagada'];
-                    foreach($opts as $o){ $sel=$o===$vIva?'selected':''; echo '<option '.$sel.' value="'.h($o).'">'.h(ucfirst($o)).'</option>'; }
+                    foreach($opts as $o){ $sel=$o===$displayIva?'selected':''; echo '<option '.$sel.' value="'.h($o).'">'.h(ucfirst($o)).'</option>'; }
                   ?>
                 </select>
               </td>
@@ -381,7 +287,7 @@ try {
                 <select class="estado pa border rounded px-2 py-1" disabled>
                   <?php
                     $opts=['pendiente','realizado'];
-                    foreach($opts as $o){ $sel=$o===$vPa?'selected':''; echo '<option '.$sel.' value="'.h($o).'">'.h(ucfirst($o)).'</option>'; }
+                    foreach($opts as $o){ $sel=$o===$displayPa?'selected':''; echo '<option '.$sel.' value="'.h($o).'">'.h(ucfirst($o)).'</option>'; }
                   ?>
                 </select>
               </td>
@@ -389,7 +295,7 @@ try {
                 <select class="estado planilla border rounded px-2 py-1" disabled>
                   <?php
                     $opts=['pendiente','pagada'];
-                    foreach($opts as $o){ $sel=$o===$vPla?'selected':''; echo '<option '.$sel.' value="'.h($o).'">'.h(ucfirst($o)).'</option>'; }
+                    foreach($opts as $o){ $sel=$o===$displayPla?'selected':''; echo '<option '.$sel.' value="'.h($o).'">'.h(ucfirst($o)).'</option>'; }
                   ?>
                 </select>
               </td>
@@ -397,19 +303,18 @@ try {
                 <select class="estado conta border rounded px-2 py-1" disabled>
                   <?php
                     $opts=['pendiente','realizado'];
-                    foreach($opts as $o){ $sel=$o===$vCon?'selected':''; echo '<option '.$sel.' value="'.h($o).'">'.h(ucfirst($o)).'</option>'; }
+                    foreach($opts as $o){ $sel=$o===$displayCon?'selected':''; echo '<option '.$sel.' value="'.h($o).'">'.h(ucfirst($o)).'</option>'; }
                   ?>
                 </select>
               </td>
 
-              <td class="px-4 py-2 whitespace-nowrap"><?=h($periodoTxt)?></td>
               <td class="px-4 py-2 whitespace-nowrap">
                 <button class="btn-guardar bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded mr-2 disabled:opacity-50" disabled>Guardar</button>
                 <button class="bg-red-500 text-white px-3 py-1 rounded opacity-50 cursor-not-allowed" disabled>Eliminar</button>
               </td>
             </tr>
           <?php endforeach; else: ?>
-            <tr><td colspan="14" class="px-4 py-6 text-center text-gray-500">Sin datos para el filtro seleccionado.</td></tr>
+            <tr><td colspan="13" class="px-4 py-6 text-center text-gray-500">Sin datos para el filtro seleccionado.</td></tr>
           <?php endif; ?>
           </tbody>
         </table>
@@ -423,7 +328,6 @@ try {
     const formFiltros = document.getElementById('filtros');
     const btnEditar = document.getElementById('editarTabla');
     const tabla = document.getElementById('tablaClientes');
-    const periodoElegido = { anio: "<?= $anio ?? '' ?>", mes: "<?= $mes ?? '' ?>" };
 
     // Auto-submit filtros / habilitar Mes
     fAnio.addEventListener('change', ()=>{
@@ -448,12 +352,10 @@ try {
           if (editMode) td.classList.add('ring-1','ring-indigo-200');
           else td.classList.remove('ring-1','ring-indigo-200');
         });
-        // selects de estado
+        // selects de estado - siempre habilitados en modo edición
         tr.querySelectorAll('select.estado').forEach(sel=>{
-          // solo habilitar si hay anio+mes
-          const habilitarEstados = editMode && periodoElegido.anio && periodoElegido.mes;
-          sel.disabled = !habilitarEstados;
-          if (habilitarEstados) sel.classList.remove('opacity-60');
+          sel.disabled = !editMode;
+          if (editMode) sel.classList.remove('opacity-60');
           else sel.classList.add('opacity-60');
         });
         // botón guardar
@@ -496,24 +398,20 @@ try {
         let j = await r.json();
         if(!j.ok) throw new Error(j.msg || 'Error al actualizar cliente');
 
-        // 2) Actualizar estados (si hay periodo seleccionado)
-        if (periodoElegido.anio && periodoElegido.mes) {
-          const payloadEstados = {
-            action:'update_estados',
-            id,
-            anio: periodoElegido.anio,
-            mes:  periodoElegido.mes,
-            iva:      tr.querySelector('select.iva').value,
-            pa:       tr.querySelector('select.pa').value,
-            planilla: tr.querySelector('select.planilla').value,
-            conta:    tr.querySelector('select.conta').value
-          };
-          const fd2 = new FormData();
-          Object.entries(payloadEstados).forEach(([k,v])=>fd2.append(k,v));
-          r = await fetch(location.href, {method:'POST', body: fd2});
-          j = await r.json();
-          if(!j.ok) throw new Error(j.msg || 'Error al actualizar estados');
-        }
+        // 2) Actualizar estados (siempre disponibles ahora)
+        const payloadEstados = {
+          action:'update_estados',
+          id,
+          iva:      tr.querySelector('select.iva').value,
+          pa:       tr.querySelector('select.pa').value,
+          planilla: tr.querySelector('select.planilla').value,
+          conta:    tr.querySelector('select.conta').value
+        };
+        const fd2 = new FormData();
+        Object.entries(payloadEstados).forEach(([k,v])=>fd2.append(k,v));
+        r = await fetch(location.href, {method:'POST', body: fd2});
+        j = await r.json();
+        if(!j.ok) throw new Error(j.msg || 'Error al actualizar estados');
 
         btn.textContent = 'Guardado ✔';
         setTimeout(()=>{ btn.textContent='Guardar'; btn.disabled=false; }, 1200);
