@@ -257,6 +257,7 @@ function fechaPeriodo($anio,$mes){
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIT</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periodo</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clave Hacienda</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clave Planilla</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contacto</th>
@@ -280,6 +281,15 @@ function fechaPeriodo($anio,$mes){
                                     $pa  = strtolower($r['pa']  ?? 'pendiente');
                                     $pla = strtolower($r['planilla'] ?? 'pendiente');
                                     $con = strtolower($r['conta'] ?? 'pendiente');
+                                    
+                                    // Formatear periodo para mostrar
+                                    $meses = [
+                                        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+                                        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+                                        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+                                    ];
+                                    $periodo_texto = $r['anio'] && $r['mes'] ? 
+                                        $meses[$r['mes']] . ' ' . $r['anio'] : 'Sin periodo';
                                   ?>
                                   <tr
                                     data-fecha="<?=h($fecha)?>"
@@ -290,6 +300,7 @@ function fechaPeriodo($anio,$mes){
                                   >
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?=h($r['cliente_nombre'])?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?=h($r['nit'])?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?=h($periodo_texto)?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?=h($r['clave_hacienda'] ?? '-')?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?=h($r['clave_planilla'] ?? '-')?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?=h($r['contacto'])?></td>
@@ -308,7 +319,7 @@ function fechaPeriodo($anio,$mes){
                                   </tr>
                                   <?php endforeach; ?>
                                 <?php else: ?>
-                                  <tr><td colspan="11" class="px-6 py-4 text-sm text-gray-500">No hay datos para mostrar.</td></tr>
+                                  <tr><td colspan="12" class="px-6 py-4 text-sm text-gray-500">No hay datos para mostrar.</td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
