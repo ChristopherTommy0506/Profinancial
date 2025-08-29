@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 21-08-2025 a las 00:56:54
+-- Tiempo de generación: 29-08-2025 a las 22:19:03
 -- Versión del servidor: 9.1.0
 -- Versión de PHP: 8.3.14
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `asignaciones_cliente` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `cliente_id` bigint NOT NULL,
   `usuario_id` bigint NOT NULL,
-  `rol_en_cliente` enum('RESPONSABLE','APOYO') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'RESPONSABLE',
+  `rol_en_cliente` enum('RESPONSABLE','APOYO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'RESPONSABLE',
   `desde` date NOT NULL,
   `hasta` date DEFAULT NULL,
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -84,17 +84,17 @@ DROP TABLE IF EXISTS `bitacora_actividad`;
 CREATE TABLE IF NOT EXISTS `bitacora_actividad` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `usuario_id` bigint DEFAULT NULL,
-  `accion` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `entidad` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `accion` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `entidad` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `entidad_id` bigint DEFAULT NULL,
   `detalle` json DEFAULT NULL,
-  `ip` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_bitacora_usuario` (`usuario_id`),
   KEY `idx_bitacora_accion` (`accion`),
   KEY `idx_bitacora_entidad` (`entidad`,`entidad_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `bitacora_actividad`
@@ -185,7 +185,11 @@ INSERT INTO `bitacora_actividad` (`id`, `usuario_id`, `accion`, `entidad`, `enti
 (82, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 7, '{\"antes\": {\"nit\": \"0614-100707-007-6\", \"nrc\": \"20007-7\", \"nombre\": \"Horizonte Construcciones S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100707-007-6\", \"nrc\": \"20007-7\", \"nombre\": \"Horizonte Construcciones S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
 (83, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 8, '{\"antes\": {\"nit\": \"0614-100808-008-7\", \"nrc\": \"20008-8\", \"nombre\": \"Ícaro Travel S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100808-008-7\", \"nrc\": \"20008-8\", \"nombre\": \"Ícaro Travel S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
 (84, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 9, '{\"antes\": {\"nit\": \"0614-100909-009-8\", \"nrc\": \"20009-9\", \"nombre\": \"Jaguar Security S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100909-009-8\", \"nrc\": \"20009-9\", \"nombre\": \"Jaguar Security S.A. de C.V.\"}}', NULL, '2025-08-20 23:49:28'),
-(85, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-08-21 00:46:17');
+(85, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-08-21 00:46:17'),
+(86, NULL, 'CREAR_CLIENTE', 'clientes', 12, '{\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan\"}', NULL, '2025-08-29 20:52:31'),
+(87, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 12, '{\"antes\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan\"}, \"despues\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan\"}}', NULL, '2025-08-29 21:35:40'),
+(88, NULL, 'CREAR_CLIENTE', 'clientes', 13, '{\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}', NULL, '2025-08-29 21:45:42'),
+(89, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 5, '{\"antes\": {\"nit\": \"0614-100505-005-4\", \"nrc\": \"20005-5\", \"nombre\": \"Fénix Agro S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100505-005-4\", \"nrc\": \"20005-5\", \"nombre\": \"Fénix Agro S.A. de C.V.\"}}', NULL, '2025-08-29 22:15:08');
 
 -- --------------------------------------------------------
 
@@ -196,39 +200,49 @@ INSERT INTO `bitacora_actividad` (`id`, `usuario_id`, `accion`, `entidad`, `enti
 DROP TABLE IF EXISTS `clientes`;
 CREATE TABLE IF NOT EXISTS `clientes` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nit` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `nrc` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `contacto` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `telefono` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(160) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `clave_hacienda` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `clave_planilla` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `contador` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `direccion` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nit` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nrc` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contacto` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clave_hacienda` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clave_planilla` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contador` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `direccion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_en` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `declaracion_iva` enum('documento pendiente','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
+  `declaracion_pa` enum('documento pendiente','realizado') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
+  `declaracion_planilla` enum('documento pendiente','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
+  `declaracion_contabilidad` enum('pendiente de procesar','en proceso','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'pendiente de procesar',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_clientes_ident` (`nit`,`nrc`),
-  KEY `idx_clientes_nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_clientes_nombre` (`nombre`),
+  KEY `idx_declaracion_iva` (`declaracion_iva`),
+  KEY `idx_declaracion_pa` (`declaracion_pa`),
+  KEY `idx_declaracion_planilla` (`declaracion_planilla`),
+  KEY `idx_declaracion_contabilidad` (`declaracion_contabilidad`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `clientes`
 --
 
-INSERT INTO `clientes` (`id`, `nombre`, `nit`, `nrc`, `contacto`, `telefono`, `email`, `clave_hacienda`, `clave_planilla`, `contador`, `direccion`, `activo`, `creado_en`, `actualizado_en`) VALUES
-(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-01', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-08-21 00:46:17'),
-(2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'AH-BRI-2025', 'PL-BRI-02', 'Luis Herrera', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
-(3, 'Cobalto Foods S.A. de C.V.', '0614-100303-003-2', '20003-3', 'Carla Ramos', '+503 2222 3003', 'finanzas@cobaltofoods.com', 'AH-COB-2025', 'PL-COB-03', 'Carolina Gómez', 'Santa Tecla, La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
-(4, 'Eclipse Retail S.A. de C.V.', '0614-100404-004-3', '20004-4', 'Eduardo Molina', '+503 2222 4004', 'contacto@eclipseretail.com', 'AH-ECL-2025', 'PL-ECL-04', 'Eduardo Rivera', 'Antiguo Cuscatlán', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
-(5, 'Fénix Agro S.A. de C.V.', '0614-100505-005-4', '20005-5', 'Fernanda Cruz', '+503 2222 5005', 'info@fenixagro.com', 'AH-FEN-2025', 'PL-FEN-05', 'Fernanda Soto', 'Soyapango', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
-(6, 'Galaxia Media S.A. de C.V.', '0614-100606-006-5', '20006-6', 'Gabriela Soto', '+503 2222 6006', 'contacto@galaxiamedia.com', 'AH-GAL-2025', 'PL-GAL-06', 'Gabriela Núñez', 'Santa Tecla', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
-(7, 'Horizonte Construcciones S.A. de C.V.', '0614-100707-007-6', '20007-7', 'Héctor Pineda', '+503 2222 7007', 'proyectos@horizonte.com', 'AH-HOR-2025', 'PL-HOR-07', 'Héctor Ramos', 'San Miguel', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
-(8, 'Ícaro Travel S.A. de C.V.', '0614-100808-008-7', '20008-8', 'Irene Lazo', '+503 2222 8008', 'ventas@icarotravel.com', 'AH-ICA-2025', 'PL-ICA-08', 'Irene Morales', 'La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
-(9, 'Jaguar Security S.A. de C.V.', '0614-100909-009-8', '20009-9', 'Javier Campos', '+503 2222 9009', 'operaciones@jaguarsec.com', 'AH-JAG-2025', 'PL-JAG-09', 'Javier Pineda', 'San Salvador, Centro', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28'),
-(10, 'Kappa Servicios S.A. de C.V.', '0614-101010-010-9', '20010-0', 'Karla Mejía', '+503 2222 1010', 'soporte@kappasv.com', NULL, NULL, NULL, 'Mejicanos', 1, '2025-08-18 23:39:07', NULL);
+INSERT INTO `clientes` (`id`, `nombre`, `nit`, `nrc`, `contacto`, `telefono`, `email`, `clave_hacienda`, `clave_planilla`, `contador`, `direccion`, `activo`, `creado_en`, `actualizado_en`, `declaracion_iva`, `declaracion_pa`, `declaracion_planilla`, `declaracion_contabilidad`) VALUES
+(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-01', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-08-21 00:46:17', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'AH-BRI-2025', 'PL-BRI-02', 'Luis Herrera', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(3, 'Cobalto Foods S.A. de C.V.', '0614-100303-003-2', '20003-3', 'Carla Ramos', '+503 2222 3003', 'finanzas@cobaltofoods.com', 'AH-COB-2025', 'PL-COB-03', 'Carolina Gómez', 'Santa Tecla, La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(4, 'Eclipse Retail S.A. de C.V.', '0614-100404-004-3', '20004-4', 'Eduardo Molina', '+503 2222 4004', 'contacto@eclipseretail.com', 'AH-ECL-2025', 'PL-ECL-04', 'Eduardo Rivera', 'Antiguo Cuscatlán', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(5, 'Fénix Agro S.A. de C.V.', '0614-100505-005-4', '20005-5', 'Fernanda Cruz', '+503 2222 5005', 'info@fenixagro.com', 'AH-FEN-2025', 'PL-FEN-05', 'Fernanda Soto', 'Soyapango', 1, '2025-08-18 23:39:07', '2025-08-29 22:15:08', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(6, 'Galaxia Media S.A. de C.V.', '0614-100606-006-5', '20006-6', 'Gabriela Soto', '+503 2222 6006', 'contacto@galaxiamedia.com', 'AH-GAL-2025', 'PL-GAL-06', 'Gabriela Núñez', 'Santa Tecla', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(7, 'Horizonte Construcciones S.A. de C.V.', '0614-100707-007-6', '20007-7', 'Héctor Pineda', '+503 2222 7007', 'proyectos@horizonte.com', 'AH-HOR-2025', 'PL-HOR-07', 'Héctor Ramos', 'San Miguel', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(8, 'Ícaro Travel S.A. de C.V.', '0614-100808-008-7', '20008-8', 'Irene Lazo', '+503 2222 8008', 'ventas@icarotravel.com', 'AH-ICA-2025', 'PL-ICA-08', 'Irene Morales', 'La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(9, 'Jaguar Security S.A. de C.V.', '0614-100909-009-8', '20009-9', 'Javier Campos', '+503 2222 9009', 'operaciones@jaguarsec.com', 'AH-JAG-2025', 'PL-JAG-09', 'Javier Pineda', 'San Salvador, Centro', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(10, 'Kappa Servicios S.A. de C.V.', '0614-101010-010-9', '20010-0', 'Karla Mejía', '+503 2222 1010', 'soporte@kappasv.com', NULL, NULL, NULL, 'Mejicanos', 1, '2025-08-18 23:39:07', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(12, 'Juan', '01702630', '25326326', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170291', 'Jose', 'Calle', 1, '2025-08-29 20:52:31', '2025-08-29 21:35:40', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(13, 'tommy', '017026300', '253263260', 'messi', '75747039', 'jr@gmail.com', '20170295', '20170295', 'Jose', 'Colonia Zacamil', 1, '2025-08-29 21:45:42', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar');
 
 --
 -- Disparadores `clientes`
@@ -275,10 +289,10 @@ DROP TABLE IF EXISTS `credenciales_cliente`;
 CREATE TABLE IF NOT EXISTS `credenciales_cliente` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `cliente_id` bigint NOT NULL,
-  `servicio` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `usuario_servicio` varchar(160) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `servicio` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `usuario_servicio` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `secreto` varbinary(1024) DEFAULT NULL,
-  `notas` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notas` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_en` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -301,7 +315,7 @@ CREATE TABLE IF NOT EXISTS `periodos` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_periodo` (`cliente_id`,`anio`,`mes`),
   KEY `idx_periodo_anio_mes` (`anio`,`mes`)
-) ;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Volcado de datos para la tabla `periodos`
@@ -317,7 +331,9 @@ INSERT INTO `periodos` (`id`, `cliente_id`, `anio`, `mes`, `creado_en`) VALUES
 (7, 7, 2025, 7, '2025-08-18 23:39:07'),
 (8, 8, 2025, 7, '2025-08-18 23:39:07'),
 (9, 9, 2025, 7, '2025-08-18 23:39:07'),
-(10, 10, 2025, 7, '2025-08-18 23:39:07');
+(10, 10, 2025, 7, '2025-08-18 23:39:07'),
+(11, 12, 2025, 8, '2025-08-29 21:06:13'),
+(12, 13, 2025, 8, '2025-08-29 21:45:42');
 
 -- --------------------------------------------------------
 
@@ -335,8 +351,8 @@ CREATE TABLE IF NOT EXISTS `presentaciones` (
   `presentado_por` bigint DEFAULT NULL,
   `pagado` tinyint(1) NOT NULL DEFAULT '0',
   `fecha_pago` date DEFAULT NULL,
-  `comprobante_pago` varchar(160) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `comprobante_pago` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `observaciones` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_en` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -491,7 +507,7 @@ DELIMITER ;
 DROP TABLE IF EXISTS `roles`;
 CREATE TABLE IF NOT EXISTS `roles` (
   `id` tinyint NOT NULL,
-  `nombre` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -505,8 +521,8 @@ CREATE TABLE IF NOT EXISTS `roles` (
 DROP TABLE IF EXISTS `tipos_formulario`;
 CREATE TABLE IF NOT EXISTS `tipos_formulario` (
   `id` smallint NOT NULL AUTO_INCREMENT,
-  `codigo` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nombre` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `codigo` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `codigo` (`codigo`)
@@ -532,9 +548,9 @@ INSERT INTO `tipos_formulario` (`id`, `codigo`, `nombre`, `activo`) VALUES
 DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE IF NOT EXISTS `usuarios` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `rol_id` tinyint NOT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -566,20 +582,6 @@ ALTER TABLE `bitacora_actividad`
 --
 ALTER TABLE `credenciales_cliente`
   ADD CONSTRAINT `fk_cred_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`);
-
---
--- Filtros para la tabla `periodos`
---
-ALTER TABLE `periodos`
-  ADD CONSTRAINT `fk_periodo_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`);
-
---
--- Filtros para la tabla `presentaciones`
---
-ALTER TABLE `presentaciones`
-  ADD CONSTRAINT `fk_pres_periodo` FOREIGN KEY (`periodo_id`) REFERENCES `periodos` (`id`),
-  ADD CONSTRAINT `fk_pres_tipo` FOREIGN KEY (`tipo_formulario_id`) REFERENCES `tipos_formulario` (`id`),
-  ADD CONSTRAINT `fk_pres_usuario` FOREIGN KEY (`presentado_por`) REFERENCES `usuarios` (`id`);
 
 --
 -- Filtros para la tabla `usuarios`

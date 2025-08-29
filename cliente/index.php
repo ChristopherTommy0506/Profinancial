@@ -44,7 +44,7 @@ try {
    * Mapea columna "PA" del front a código 'RENTA' de la BD.
    */
   
-  // Consulta principal con paginación
+  // Consulta principal con paginación - AGREGADAS LAS NUEVAS COLUMNAS
   $sql = "
     SELECT
       c.id   AS cliente_id,
@@ -73,7 +73,13 @@ try {
 
       MAX(CASE WHEN tf.codigo IN ('CONTAB','CONTABILIDAD')
            THEN CASE WHEN (p.presentado=1 OR p.pagado=1) THEN 'realizado'
-                     ELSE 'pendiente' END END) AS conta
+                     ELSE 'pendiente' END END) AS conta,
+
+      -- NUEVAS COLUMNAS AGREGADAS
+      c.declaracion_iva,
+      c.declaracion_pa, 
+      c.declaracion_planilla,
+      c.declaracion_contabilidad
 
     FROM clientes c
     LEFT JOIN periodos per        ON per.cliente_id=c.id
@@ -277,10 +283,11 @@ function fechaPeriodo($anio,$mes){
                                   <?php foreach ($rows as $r): 
                                     if (!$r['anio'] || !$r['mes']) continue;
                                     $fecha = fechaPeriodo($r['anio'],$r['mes']);
-                                    $iva = strtolower($r['iva'] ?? 'pendiente');
-                                    $pa  = strtolower($r['pa']  ?? 'pendiente');
-                                    $pla = strtolower($r['planilla'] ?? 'pendiente');
-                                    $con = strtolower($r['conta'] ?? 'pendiente');
+                                    // Usamos las nuevas columnas en lugar de las calculadas
+                                    $iva = strtolower($r['declaracion_iva'] ?? $r['iva'] ?? 'pendiente');
+                                    $pa  = strtolower($r['declaracion_pa'] ?? $r['pa'] ?? 'pendiente');
+                                    $pla = strtolower($r['declaracion_planilla'] ?? $r['planilla'] ?? 'pendiente');
+                                    $con = strtolower($r['declaracion_contabilidad'] ?? $r['conta'] ?? 'pendiente');
                                     
                                     // Formatear periodo para mostrar
                                     $meses = [
@@ -440,161 +447,174 @@ function fechaPeriodo($anio,$mes){
     function openModal() { document.getElementById('modal').classList.remove('hidden'); document.getElementById('modal').classList.add('flex'); }
     function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
 
-    // ------ Filtro por Apartado/Estado + Periodo (Año/Mes/Día) ------
-    (function(){
-      const tbody        = document.querySelector("#tablaClientes tbody");
-      const $apartado    = document.getElementById("selectApartado");
-      const $estado      = document.getElementById("selectEstado");
-      const $chkFiltrar  = document.getElementById("chkFiltrar");
-      const $filtroTexto = document.getElementById("filtroTexto");
-      const $anio        = document.getElementById("selectAnio");
-      const $mes         = document.getElementById("selectMes");
-      const $dia         = document.getElementById("selectDia");
+// ------ Filtro por Apartado/Estado + Periodo (Año/Mes/Día) ------
+(function(){
+  const tbody        = document.querySelector("#tablaClientes tbody");
+  const $apartado    = document.getElementById("selectApartado");
+  const $estado      = document.getElementById("selectEstado");
+  const $chkFiltrar  = document.getElementById("chkFiltrar");
+  const $filtroTexto = document.getElementById("filtroTexto");
+  const $anio        = document.getElementById("selectAnio");
+  const $mes         = document.getElementById("selectMes");
+  const $dia         = document.getElementById("selectDia");
 
-      const ESTADOS = {
-        iva:      ["pendiente", "presentada", "pagada", "almacenada"],
-        pa:       ["pendiente", "realizado"],
-        planilla: ["pagada", "pendiente"],
-        conta:    ["pendiente", "realizado"]
-      };
+  // ESTADOS ACTUALIZADOS con los nuevos valores
+  const ESTADOS = {
+    iva:      ["documento pendiente", "presentada", "pagada"],
+    pa:       ["documento pendiente", "realizado"],
+    planilla: ["documento pendiente", "pagada"],
+    conta:    ["pendiente de procesar", "en proceso", "presentada", "pagada"]
+  };
 
-      const MESES = [
-        {v:1, n:"Enero"}, {v:2, n:"Febrero"}, {v:3, n:"Marzo"}, {v:4, n:"Abril"},
-        {v:5, n:"Mayo"}, {v:6, n:"Junio"}, {v:7, n:"Julio"}, {v:8, n:"Agosto"},
-        {v:9, n:"Septiembre"}, {v:10, n:"Octubre"}, {v:11, n:"Noviembre"}, {v:12, n:"Diciembre"}
-      ];
+  const MESES = [
+    {v:1, n:"Enero"}, {v:2, n:"Febrero"}, {v:3, n:"Marzo"}, {v:4, n:"Abril"},
+    {v:5, n:"Mayo"}, {v:6, n:"Junio"}, {v:7, n:"Julio"}, {v:8, n:"Agosto"},
+    {v:9, n:"Septiembre"}, {v:10, n:"Octubre"}, {v:11, n:"Noviembre"}, {v:12, n:"Diciembre"}
+  ];
 
-      const badgeClasses = (val) => {
-        const v = (val || "").toLowerCase();
-        if (v === "pendiente")                          return "bg-yellow-100 text-yellow-800";
-        if (v === "presentada")                         return "bg-blue-100 text-blue-800";
-        if (v === "realizado")                          return "bg-indigo-100 text-indigo-800";
-        if (v === "pagada" || v === "pagado")           return "bg-green-100 text-green-800";
-        if (v === "almacenada" || v === "almacenado")   return "bg-gray-200 text-gray-800";
-        return "bg-slate-100 text-slate-800";
-      };
+  const badgeClasses = (val) => {
+    const v = (val || "").toLowerCase();
+    if (v === "documento pendiente" || v === "pendiente de procesar") return "bg-yellow-100 text-yellow-800";
+    if (v === "presentada") return "bg-blue-100 text-blue-800";
+    if (v === "realizado" || v === "en proceso") return "bg-indigo-100 text-indigo-800";
+    if (v === "pagada" || v === "pagado") return "bg-green-100 text-green-800";
+    return "bg-slate-100 text-slate-800";
+  };
 
-      const norm = (s='') => s.toString().trim().toLowerCase();
-      const cap  = (s='') => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  const norm = (s='') => s.toString().trim().toLowerCase();
+  
+  // Función para capitalizar correctamente los nuevos estados
+  const cap = (s='') => {
+    if (!s) return s;
+    s = s.toLowerCase();
+    if (s === "documento pendiente") return "Documento pendiente";
+    if (s === "pendiente de procesar") return "Pendiente de procesar";
+    if (s === "en proceso") return "En proceso";
+    if (s === "presentada") return "Presentada";
+    if (s === "pagada") return "Pagada";
+    if (s === "realizado") return "Realizado";
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
 
-      function renderBadges() {
-        tbody.querySelectorAll("tr").forEach(row => {
-          ["iva","pa","planilla","conta"].forEach(col => {
-            const val = row.getAttribute(`data-${col}`) || "";
-            const target = row.querySelector(`.estado-badge[data-col="${col}"]`);
-            if (target) {
-              target.className = `estado-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badgeClasses(val)}`;
-              target.textContent = val ? cap(val) : "-";
-              target.title = target.textContent;
-            }
-          });
-        });
-      }
-
-      function fillEstados(apartado) {
-        const opts = ESTADOS[apartado] || [];
-        $estado.innerHTML = opts.map(e => `<option value=\"${e}\">${cap(e)}</option>`).join("");
-      }
-
-      function uniqueYears() {
-        const years = new Set();
-        tbody.querySelectorAll("tr").forEach(tr => {
-          const f = tr.getAttribute("data-fecha");
-          if (f && /^\d{4}-\d{2}-\d{2}$/.test(f)) years.add(parseInt(f.slice(0,4), 10));
-        });
-        return Array.from(years).sort((a,b)=>b-a);
-      }
-
-      function fillAnios() {
-        const años = uniqueYears();
-        $anio.innerHTML = `<option value=\"\">Todos</option>` + años.map(y=>`<option value=\"${y}\">${y}</option>`).join("");
-      }
-
-      function fillMeses(habilitar) {
-        $mes.innerHTML = `<option value=\"\">Todos</option>` + MESES.map(m=>`<option value=\"${m.v}\">${m.n}</option>`).join("");
-        $mes.disabled = !habilitar;
-      }
-
-      function daysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
-
-      function fillDias(habilitar, year, month) {
-        $dia.innerHTML = `<option value=\"\">Todos</option>`;
-        if (habilitar && year && month) {
-          const max = daysInMonth(year, month);
-          let opts = "";
-          for (let d=1; d<=max; d++) opts += `<option value=\"${d}\">${d}</option>`;
-          $dia.innerHTML = `<option value=\"\">Todos</option>` + opts;
+  function renderBadges() {
+    tbody.querySelectorAll("tr").forEach(row => {
+      ["iva","pa","planilla","conta"].forEach(col => {
+        const val = row.getAttribute(`data-${col}`) || "";
+        const target = row.querySelector(`.estado-badge[data-col="${col}"]`);
+        if (target) {
+          target.className = `estado-badge inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badgeClasses(val)}`;
+          target.textContent = val ? cap(val) : "-";
+          target.title = target.textContent;
         }
-        $dia.disabled = !habilitar;
+      });
+    });
+  }
+
+  function fillEstados(apartado) {
+    const opts = ESTADOS[apartado] || [];
+    $estado.innerHTML = opts.map(e => `<option value=\"${e}\">${cap(e)}</option>`).join("");
+  }
+
+  function uniqueYears() {
+    const years = new Set();
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const f = tr.getAttribute("data-fecha");
+      if (f && /^\d{4}-\d{2}-\d{2}$/.test(f)) years.add(parseInt(f.slice(0,4), 10));
+    });
+    return Array.from(years).sort((a,b)=>b-a);
+  }
+
+  function fillAnios() {
+    const años = uniqueYears();
+    $anio.innerHTML = `<option value=\"\">Todos</option>` + años.map(y=>`<option value=\"${y}\">${y}</option>`).join("");
+  }
+
+  function fillMeses(habilitar) {
+    $mes.innerHTML = `<option value=\"\">Todos</option>` + MESES.map(m=>`<option value=\"${m.v}\">${m.n}</option>`).join("");
+    $mes.disabled = !habilitar;
+  }
+
+  function daysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
+
+  function fillDias(habilitar, year, month) {
+    $dia.innerHTML = `<option value=\"\">Todos</option>`;
+    if (habilitar && year && month) {
+      const max = daysInMonth(year, month);
+      let opts = "";
+      for (let d=1; d<=max; d++) opts += `<option value=\"${d}\">${d}</option>`;
+      $dia.innerHTML = `<option value=\"\">Todos</option>` + opts;
+    }
+    $dia.disabled = !habilitar;
+  }
+
+  function applyFilter() {
+    const apartado = $apartado.value;
+    const estadoSel = norm($estado.value || "");
+    const q = norm($filtroTexto.value || "");
+
+    const ySel = $anio.value ? parseInt($anio.value, 10) : null;
+    const mSel = $mes.value ? parseInt($mes.value, 10) : null;
+    const dSel = $dia.value ? parseInt($dia.value, 10) : null;
+
+    Array.from(tbody.querySelectorAll("tr")).forEach(row => {
+      const matchesText = q ? row.innerText.toLowerCase().includes(q) : true;
+
+      let matchesState = true;
+      // CORREGIDO: Solo aplicar filtro de estado si el checkbox está marcado
+      if ($chkFiltrar.checked && estadoSel) {
+        const val = norm(row.getAttribute(`data-${apartado}`) || "");
+        matchesState = (val === estadoSel);
       }
 
-      function applyFilter() {
-        const apartado = $apartado.value;
-        const estadoSel = norm($estado.value || "");
-        const q = norm($filtroTexto.value || "");
-
-        const ySel = $anio.value ? parseInt($anio.value, 10) : null;
-        const mSel = $mes.value ? parseInt($mes.value, 10) : null;
-        const dSel = $dia.value ? parseInt($dia.value, 10) : null;
-
-        Array.from(tbody.querySelectorAll("tr")).forEach(row => {
-          const matchesText = q ? row.innerText.toLowerCase().includes(q) : true;
-
-          let matchesState = true;
-          // CORREGIDO: Solo aplicar filtro de estado si el checkbox está marcado
-          if ($chkFiltrar.checked && estadoSel) {
-            const val = norm(row.getAttribute(`data-${apartado}`) || "");
-            matchesState = (val === estadoSel);
-          }
-
-          let matchesPeriod = true;
-          const f = row.getAttribute("data-fecha");
-          if (f && /^\d{4}-\d{2}-\d{2}$/.test(f)) {
-            const yr = parseInt(f.slice(0,4), 10);
-            const mo = parseInt(f.slice(5,7), 10);
-            const dy = parseInt(f.slice(8,10), 10);
-            if (ySel !== null && yr !== ySel) matchesPeriod = false;
-            if (matchesPeriod && mSel !== null && mo !== mSel) matchesPeriod = false;
-            if (matchesPeriod && dSel !== null && dy !== dSel) matchesPeriod = false;
-          } else {
-            if (ySel !== null || mSel !== null || dSel !== null) matchesPeriod = false;
-          }
-
-          row.style.display = (matchesText && matchesState && matchesPeriod) ? "" : "none";
-        });
+      let matchesPeriod = true;
+      const f = row.getAttribute("data-fecha");
+      if (f && /^\d{4}-\d{2}-\d{2}$/.test(f)) {
+        const yr = parseInt(f.slice(0,4), 10);
+        const mo = parseInt(f.slice(5,7), 10);
+        const dy = parseInt(f.slice(8,10), 10);
+        if (ySel !== null && yr !== ySel) matchesPeriod = false;
+        if (matchesPeriod && mSel !== null && mo !== mSel) matchesPeriod = false;
+        if (matchesPeriod && dSel !== null && dy !== dSel) matchesPeriod = false;
+      } else {
+        if (ySel !== null || mSel !== null || dSel !== null) matchesPeriod = false;
       }
 
-      $apartado.addEventListener("change", () => { fillEstados($apartado.value); applyFilter(); });
-      $estado.addEventListener("change", applyFilter);
-      $chkFiltrar.addEventListener("change", applyFilter);
-      $filtroTexto.addEventListener("input", applyFilter);
+      row.style.display = (matchesText && matchesState && matchesPeriod) ? "" : "none";
+    });
+  }
 
-      $anio.addEventListener("change", () => {
-        const ySel = $anio.value ? parseInt($anio.value, 10) : null;
-        fillMeses(!!ySel);
-        $mes.value = "";
-        fillDias(false);
-        applyFilter();
-      });
+  $apartado.addEventListener("change", () => { fillEstados($apartado.value); applyFilter(); });
+  $estado.addEventListener("change", applyFilter);
+  $chkFiltrar.addEventListener("change", applyFilter);
+  $filtroTexto.addEventListener("input", applyFilter);
 
-      $mes.addEventListener("change", () => {
-        const ySel = $anio.value ? parseInt($anio.value, 10) : null;
-        const mSel = $mes.value ? parseInt($mes.value, 10) : null;
-        fillDias(!!(ySel && mSel), ySel, mSel);
-        $dia.value = "";
-        applyFilter();
-      });
+  $anio.addEventListener("change", () => {
+    const ySel = $anio.value ? parseInt($anio.value, 10) : null;
+    fillMeses(!!ySel);
+    $mes.value = "";
+    fillDias(false);
+    applyFilter();
+  });
 
-      $dia.addEventListener("change", applyFilter);
+  $mes.addEventListener("change", () => {
+    const ySel = $anio.value ? parseInt($anio.value, 10) : null;
+    const mSel = $mes.value ? parseInt($mes.value, 10) : null;
+    fillDias(!!(ySel && mSel), ySel, mSel);
+    $dia.value = "";
+    applyFilter();
+  });
 
-      // Init
-      fillEstados($apartado.value);
-      renderBadges();
-      fillAnios();
-      fillMeses(false);
-      fillDias(false);
-      // CORREGIDO: No aplicar filtro automáticamente al cargar la página
-    })();
+  $dia.addEventListener("change", applyFilter);
+
+  // Init
+  fillEstados($apartado.value);
+  renderBadges();
+  fillAnios();
+  fillMeses(false);
+  fillDias(false);
+  // CORREGIDO: No aplicar filtro automáticamente al cargar la página
+})();
+</script>
     </script>
     
     <!-- Script para resaltar la página activa en el menú -->
@@ -602,7 +622,7 @@ function fechaPeriodo($anio,$mes){
     const currentPage = window.location.pathname.split("/").pop();
 
     document.querySelectorAll(".sidebar-item").forEach(item => {
-        const linkPage = item.getAttribute("href").split("/").pop(); 
+        const linkPage = item.getAttribute("href").split("/).pop(); 
         if (linkPage === currentPage) {
             item.classList.add("active"); 
         } else {
