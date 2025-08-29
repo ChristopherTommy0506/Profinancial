@@ -21,6 +21,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $clave_planilla = $_POST['clave_planilla'] ?? '';
     $contador = $_POST['contador'] ?? '';
     $direccion = $_POST['direccion'] ?? '';
+    
+    // Nuevos campos de estados
+    $declaracion_iva = $_POST['declaracion_iva'] ?? 'documento pendiente';
+    $declaracion_pa = $_POST['declaracion_pa'] ?? 'documento pendiente';
+    $declaracion_planilla = $_POST['declaracion_planilla'] ?? 'documento pendiente';
+    $declaracion_contabilidad = $_POST['declaracion_contabilidad'] ?? 'documento pendiente';
 
     // Verificar duplicado por NIT
     $check = $conn->query("SELECT id FROM clientes WHERE nit = '$nit'");
@@ -36,9 +42,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->begin_transaction();
 
     try {
-        // Insertar el cliente
-        $sql = "INSERT INTO clientes (nombre, nit, nrc, contacto, telefono, email, clave_hacienda, clave_planilla, contador, direccion)
-                VALUES ('$nombre', '$nit', '$nrc', '$contacto', '$telefono', '$email', '$clave_hacienda', '$clave_planilla', '$contador', '$direccion')";
+        // Insertar el cliente con los nuevos campos
+        $sql = "INSERT INTO clientes 
+                (nombre, nit, nrc, contacto, telefono, email, 
+                 clave_hacienda, clave_planilla, contador, direccion,
+                 declaracion_iva, declaracion_pa, declaracion_planilla, declaracion_contabilidad)
+                VALUES 
+                ('$nombre', '$nit', '$nrc', '$contacto', '$telefono', '$email', 
+                 '$clave_hacienda', '$clave_planilla', '$contador', '$direccion',
+                 '$declaracion_iva', '$declaracion_pa', '$declaracion_planilla', '$declaracion_contabilidad')";
 
         if ($conn->query($sql) === TRUE) {
             // Obtener el ID del cliente recién insertado

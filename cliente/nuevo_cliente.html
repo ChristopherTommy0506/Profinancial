@@ -7,6 +7,40 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <title>Agregar nuevo cliente</title>
+  <style>
+    .estado-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-documento-pendiente {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    .badge-pendiente-procesar {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    .badge-en-proceso {
+      background-color: #e0e7ff;
+      color: #3730a3;
+    }
+    .badge-presentada {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+    .badge-pagada {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    .badge-realizado {
+      background-color: #e0e7ff;
+      color: #3730a3;
+    }
+  </style>
 </head>
 <body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
   <div class="bg-white rounded-xl w-full max-w-5xl shadow-lg p-8">
@@ -70,54 +104,159 @@
         </div>
       </div>
 
-      <!-- Áreas requeridas (opcional, lo dejamos tal como estaba) -->
+      <!-- Estados de declaraciones según la nueva estructura de BD -->
       <div class="md:col-span-2">
-        <label class="block text-gray-700 font-medium mb-1">Áreas requeridas</label>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <label for="iva" class="block text-sm text-gray-700 font-medium">Declaración IVA</label>
-            <select id="iva" name="iva" class="w-full border rounded px-3 py-2">
-              <option value="pendiente">Pendiente</option>
-              <option value="solvente">Solvente</option>
-              <option value="seguimiento">En seguimiento</option>
-            </select>
+        <label class="block text-gray-700 font-medium mb-1">Estados de Declaraciones</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Declaración IVA -->
+          <div class="border rounded-lg p-4">
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-file-invoice-dollar mr-2 text-blue-500"></i>
+              Declaración IVA
+            </h3>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_iva" value="documento pendiente" class="mr-2" checked>
+                <span class="estado-badge badge-documento-pendiente">Documento pendiente</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_iva" value="pendiente de procesar" class="mr-2">
+                <span class="estado-badge badge-pendiente-procesar">Pendiente de procesar</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_iva" value="en proceso" class="mr-2">
+                <span class="estado-badge badge-en-proceso">En proceso</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_iva" value="presentada" class="mr-2">
+                <span class="estado-badge badge-presentada">Presentada</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_iva" value="pagada" class="mr-2">
+                <span class="estado-badge badge-pagada">Pagada</span>
+              </label>
+            </div>
           </div>
 
-          <div>
-            <label for="pa" class="block text-sm text-gray-700 font-medium">Declaración PA</label>
-            <select id="pa" name="pa" class="w-full border rounded px-3 py-2">
-              <option value="pendiente">Pendiente</option>
-              <option value="solvente">Solvente</option>
-              <option value="seguimiento">En seguimiento</option>
-            </select>
+          <!-- Declaración PA -->
+          <div class="border rounded-lg p-4">
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-file-alt mr-2 text-green-500"></i>
+              Declaración PA
+            </h3>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_pa" value="documento pendiente" class="mr-2" checked>
+                <span class="estado-badge badge-documento-pendiente">Documento pendiente</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_pa" value="pendiente de procesar" class="mr-2">
+                <span class="estado-badge badge-pendiente-procesar">Pendiente de procesar</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_pa" value="en proceso" class="mr-2">
+                <span class="estado-badge badge-en-proceso">En proceso</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_pa" value="presentada" class="mr-2">
+                <span class="estado-badge badge-presentada">Presentada</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_pa" value="pagada" class="mr-2">
+                <span class="estado-badge badge-pagada">Pagada</span>
+              </label>
+            </div>
           </div>
 
-          <div>
-            <label for="planilla" class="block text-sm text-gray-700 font-medium">Planilla</label>
-            <select id="planilla" name="planilla" class="w-full border rounded px-3 py-2">
-              <option value="pendiente">Pendiente</option>
-              <option value="solvente">Solvente</option>
-              <option value="seguimiento">En seguimiento</option>
-            </select>
+          <!-- Planilla -->
+          <div class="border rounded-lg p-4">
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-file-contract mr-2 text-purple-500"></i>
+              Planilla
+            </h3>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_planilla" value="documento pendiente" class="mr-2" checked>
+                <span class="estado-badge badge-documento-pendiente">Documento pendiente</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_planilla" value="pendiente de procesar" class="mr-2">
+                <span class="estado-badge badge-pendiente-procesar">Pendiente de procesar</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_planilla" value="en proceso" class="mr-2">
+                <span class="estado-badge badge-en-proceso">En proceso</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_planilla" value="presentada" class="mr-2">
+                <span class="estado-badge badge-presentada">Presentada</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="declaracion_planilla" value="pagada" class="mr-2">
+                <span class="estado-badge badge-pagada">Pagada</span>
+              </label>
+            </div>
           </div>
 
-          <div>
-            <label for="contabilidad" class="block text-sm text-gray-700 font-medium">Contabilidad</label>
-            <select id="contabilidad" name="contabilidad" class="w-full border rounded px-3 py-2">
-              <option value="pendiente">Pendiente</option>
-              <option value="solvente">Solvente</option>
-              <option value="seguimiento">En seguimiento</option>
-            </select>
+          <!-- Contabilidad -->
+          <div class="border rounded-lg p-4">
+              <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-calculator mr-2 text-red-500"></i>
+                  Contabilidad
+              </h3>
+              <div class="space-y-2">
+                  <label class="flex items-center">
+                      <input type="radio" name="declaracion_contabilidad" value="documento pendiente" class="mr-2" checked>
+                      <span class="estado-badge badge-documento-pendiente">Documento pendiente</span>
+                  </label>
+                  <label class="flex items-center">
+                      <input type="radio" name="declaracion_contabilidad" value="pendiente de procesar" class="mr-2">
+                      <span class="estado-badge badge-pendiente-procesar">Pendiente de procesar</span>
+                  </label>
+                  <label class="flex items-center">
+                      <input type="radio" name="declaracion_contabilidad" value="en proceso" class="mr-2">
+                      <span class="estado-badge badge-en-proceso">En proceso</span>
+                  </label>
+                  <label class="flex items-center">
+                      <input type="radio" name="declaracion_contabilidad" value="presentada" class="mr-2">
+                      <span class="estado-badge badge-presentada">Presentada</span>
+                  </label>
+              </div>
+            </div>
           </div>
-        </div>
       </div>
 
       <!-- Botones abajo -->
       <div class="md:col-span-2 flex justify-between mt-8">
+<<<<<<< Updated upstream
         <a href="../cliente/index.php"><button type="button" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition">Regresar</button></a>
         <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Guardar Cliente</button>
+=======
+        <a href="../index.php">
+          <button type="button" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition">
+            Regresar
+          </button>
+        </a>
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+          Guardar Cliente
+        </button>
+>>>>>>> Stashed changes
       </div>
     </form>
   </div>
+
+  <script>
+    // Validación básica del formulario
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const nombre = document.querySelector('input[name="nombre"]').value;
+      const nit = document.querySelector('input[name="nit"]').value;
+      
+      if (!nombre.trim() || !nit.trim()) {
+        e.preventDefault();
+        alert('Por favor, complete los campos obligatorios: Nombre y NIT');
+        return false;
+      }
+    });
+  </script>
 </body>
 </html>

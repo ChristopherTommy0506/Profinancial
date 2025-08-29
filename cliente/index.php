@@ -446,7 +446,6 @@ function fechaPeriodo($anio,$mes){
     // Helpers modal
     function openModal() { document.getElementById('modal').classList.remove('hidden'); document.getElementById('modal').classList.add('flex'); }
     function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
-
 // ------ Filtro por Apartado/Estado + Periodo (Año/Mes/Día) ------
 (function(){
   const tbody        = document.querySelector("#tablaClientes tbody");
@@ -458,12 +457,12 @@ function fechaPeriodo($anio,$mes){
   const $mes         = document.getElementById("selectMes");
   const $dia         = document.getElementById("selectDia");
 
-  // ESTADOS ACTUALIZADOS con los nuevos valores
+  // ESTADOS ACTUALIZADOS - Todos los estados para IVA, PA, PLANILLA, pero CONTABILIDAD sin "pagada"
   const ESTADOS = {
-    iva:      ["documento pendiente", "presentada", "pagada"],
-    pa:       ["documento pendiente", "realizado"],
-    planilla: ["documento pendiente", "pagada"],
-    conta:    ["pendiente de procesar", "en proceso", "presentada", "pagada"]
+    iva:      ["documento pendiente", "pendiente de procesar", "en proceso", "presentada", "pagada"],
+    pa:       ["documento pendiente", "pendiente de procesar", "en proceso", "presentada", "pagada"],
+    planilla: ["documento pendiente", "pendiente de procesar", "en proceso", "presentada", "pagada"],
+    conta:    ["pendiente de procesar", "en proceso", "presentada"] // Sin "pagada"
   };
 
   const MESES = [
@@ -475,15 +474,15 @@ function fechaPeriodo($anio,$mes){
   const badgeClasses = (val) => {
     const v = (val || "").toLowerCase();
     if (v === "documento pendiente" || v === "pendiente de procesar") return "bg-yellow-100 text-yellow-800";
+    if (v === "en proceso") return "bg-indigo-100 text-indigo-800";
     if (v === "presentada") return "bg-blue-100 text-blue-800";
-    if (v === "realizado" || v === "en proceso") return "bg-indigo-100 text-indigo-800";
-    if (v === "pagada" || v === "pagado") return "bg-green-100 text-green-800";
+    if (v === "pagada") return "bg-green-100 text-green-800";
     return "bg-slate-100 text-slate-800";
   };
 
   const norm = (s='') => s.toString().trim().toLowerCase();
   
-  // Función para capitalizar correctamente los nuevos estados
+  // Función para capitalizar correctamente los estados
   const cap = (s='') => {
     if (!s) return s;
     s = s.toLowerCase();
@@ -492,7 +491,6 @@ function fechaPeriodo($anio,$mes){
     if (s === "en proceso") return "En proceso";
     if (s === "presentada") return "Presentada";
     if (s === "pagada") return "Pagada";
-    if (s === "realizado") return "Realizado";
     return s.charAt(0).toUpperCase() + s.slice(1);
   };
 
@@ -560,7 +558,6 @@ function fechaPeriodo($anio,$mes){
       const matchesText = q ? row.innerText.toLowerCase().includes(q) : true;
 
       let matchesState = true;
-      // CORREGIDO: Solo aplicar filtro de estado si el checkbox está marcado
       if ($chkFiltrar.checked && estadoSel) {
         const val = norm(row.getAttribute(`data-${apartado}`) || "");
         matchesState = (val === estadoSel);
@@ -612,9 +609,7 @@ function fechaPeriodo($anio,$mes){
   fillAnios();
   fillMeses(false);
   fillDias(false);
-  // CORREGIDO: No aplicar filtro automáticamente al cargar la página
 })();
-</script>
     </script>
     
     <!-- Script para resaltar la página activa en el menú -->
