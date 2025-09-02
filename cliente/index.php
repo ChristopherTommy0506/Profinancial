@@ -53,6 +53,8 @@ try {
       c.clave_hacienda,
       c.clave_planilla,
       c.contador,
+      c.direccion,
+      c.nrc,
       per.anio, per.mes,
 
       -- Determina si es cliente nuevo (sin periodos)
@@ -89,7 +91,7 @@ try {
     WHERE per.anio IS NOT NULL AND per.mes IS NOT NULL
     GROUP BY
       c.id, c.nombre, c.nit, c.contacto, c.telefono, c.email,
-      c.clave_hacienda, c.clave_planilla, c.contador,
+      c.clave_hacienda, c.clave_planilla, c.contador, c.direccion, c.nrc,
       per.anio, per.mes
     ORDER BY per.anio DESC, per.mes DESC, c.nombre ASC
     LIMIT $offset, $rowsPerPage
@@ -304,6 +306,19 @@ function fechaPeriodo($anio,$mes){
                                     data-pa="<?=h($pa)?>"
                                     data-planilla="<?=h($pla)?>"
                                     data-conta="<?=h($con)?>"
+                                    data-cliente-id="<?=h($r['cliente_id'])?>"
+                                    data-nombre="<?=h($r['cliente_nombre'])?>"
+                                    data-nit="<?=h($r['nit'])?>"
+                                    data-nrc="<?=h($r['nrc'])?>"
+                                    data-contacto="<?=h($r['contacto'])?>"
+                                    data-telefono="<?=h($r['telefono'])?>"
+                                    data-email="<?=h($r['email'])?>"
+                                    data-clave-hacienda="<?=h($r['clave_hacienda'])?>"
+                                    data-clave-planilla="<?=h($r['clave_planilla'])?>"
+                                    data-contador="<?=h($r['contador'])?>"
+                                    data-direccion="<?=h($r['direccion'])?>"
+                                    data-anio="<?=h($r['anio'])?>"
+                                    data-mes="<?=h($r['mes'])?>"
                                   >
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?=h($r['cliente_nombre'])?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?=h($r['nit'])?></td>
@@ -319,7 +334,7 @@ function fechaPeriodo($anio,$mes){
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?=h($r['contador'] ?? '-')?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onclick="openModal()" class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                                        <button onclick="openModal(this)" class="text-green-500 hover:text-green-700 mr-3" title="Ver detalles"><i class="fas fa-eye"></i></button>
                                         <button class="text-indigo-600 hover:text-indigo-900 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
                                         <button onclick="document.getElementById('deleteModal').classList.remove('hidden')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash"></i></button>
                                     </td>
@@ -405,19 +420,21 @@ function fechaPeriodo($anio,$mes){
         <h2 class="text-xl font-bold mb-5 text-gray-800">Detalles del Cliente</h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3 text-sm">
-          <div><span class="block text-gray-500 font-semibold">Nombre:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text-gray-500 font-semibold">NIT:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text-gray-500 font-semibold">Registro:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text-gray-500 font-semibold">Clave Hacienda:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text-gray-500 font-semibold">Clave Planilla:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text-gray-500 font-semibold">Contacto:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text-gray-500 font-semibold">Teléfono:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text-gray-500 font-semibold">Correo:</span><span class="block text-gray-900">—</span></div>
-          <div><span class="block text gray-500 font-semibold">Contador:</span><span class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Nombre:</span><span id="modal-nombre" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">NIT:</span><span id="modal-nit" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">NRC:</span><span id="modal-nrc" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Periodo:</span><span id="modal-periodo" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Clave Hacienda:</span><span id="modal-clave-hacienda" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Clave Planilla:</span><span id="modal-clave-planilla" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Contacto:</span><span id="modal-contacto" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Teléfono:</span><span id="modal-telefono" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Correo:</span><span id="modal-email" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Contador:</span><span id="modal-contador" class="block text-gray-900">—</span></div>
+          <div><span class="block text-gray-500 font-semibold">Dirección:</span><span id="modal-direccion" class="block text-gray-900">—</span></div>
         </div>
 
         <div class="mt-5">
-          <a href="../cliente/perfil_cliente.html">
+          <a id="modal-perfil-link" href="#">
             <button class="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg">Perfil</button>
           </a>
         </div>
@@ -444,8 +461,58 @@ function fechaPeriodo($anio,$mes){
 
     <script>
     // Helpers modal
-    function openModal() { document.getElementById('modal').classList.remove('hidden'); document.getElementById('modal').classList.add('flex'); }
-    function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
+    function openModal(button) {
+        const row = button.closest('tr');
+        
+        // Obtener datos del cliente desde los data attributes
+        document.getElementById('modal-nombre').textContent = row.getAttribute('data-nombre') || '—';
+        document.getElementById('modal-nit').textContent = row.getAttribute('data-nit') || '—';
+        document.getElementById('modal-nrc').textContent = row.getAttribute('data-nrc') || '—';
+        document.getElementById('modal-contacto').textContent = row.getAttribute('data-contacto') || '—';
+        document.getElementById('modal-telefono').textContent = row.getAttribute('data-telefono') || '—';
+        document.getElementById('modal-email').textContent = row.getAttribute('data-email') || '—';
+        document.getElementById('modal-clave-hacienda').textContent = row.getAttribute('data-clave-hacienda') || '—';
+        document.getElementById('modal-clave-planilla').textContent = row.getAttribute('data-clave-planilla') || '—';
+        document.getElementById('modal-contador').textContent = row.getAttribute('data-contador') || '—';
+        document.getElementById('modal-direccion').textContent = row.getAttribute('data-direccion') || '—';
+        
+        // Formatear periodo
+        const anio = row.getAttribute('data-anio');
+        const mes = row.getAttribute('data-mes');
+        const meses = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+        const periodoTexto = anio && mes ? `${meses[parseInt(mes) - 1]} ${anio}` : 'Sin periodo';
+        document.getElementById('modal-periodo').textContent = periodoTexto;
+        
+        // Actualizar enlace al perfil
+        const clienteId = row.getAttribute('data-cliente-id');
+        document.getElementById('modal-perfil-link').href = `perfil_cliente.php?id=${clienteId}`;
+        
+        // Mostrar modal
+        document.getElementById('modal').classList.remove('hidden');
+        document.getElementById('modal').classList.add('flex');
+    }
+    
+    function closeModal() { 
+        document.getElementById('modal').classList.add('hidden'); 
+        document.getElementById('modal').classList.remove('flex'); 
+    }
+
+    // Cerrar modal al hacer clic fuera del contenido
+    document.getElementById('modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Cerrar modal con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
 // ------ Filtro por Apartado/Estado + Periodo (Año/Mes/Día) ------
 (function(){
   const tbody        = document.querySelector("#tablaClientes tbody");
@@ -617,7 +684,7 @@ function fechaPeriodo($anio,$mes){
     const currentPage = window.location.pathname.split("/").pop();
 
     document.querySelectorAll(".sidebar-item").forEach(item => {
-        const linkPage = item.getAttribute("href").split("/).pop(); 
+        const linkPage = item.getAttribute("href").split("/").pop(); 
         if (linkPage === currentPage) {
             item.classList.add("active"); 
         } else {
