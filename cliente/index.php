@@ -3,6 +3,14 @@
    Requiere: PHP 7.4+ y BD 'profinancial_crm'
    AJUSTA credenciales abajo
 */
+session_start();
+
+//  Verificar sesión activa
+if (!isset($_SESSION["usuario"])) {
+    header("Location: login/login.html");
+    exit();
+}
+
 $DB_HOST='localhost';
 $DB_NAME='profinancial_crm';
 $DB_USER='root';
@@ -23,12 +31,14 @@ try {
   );
 
   // Consulta para obtener el total de registros
+  /*
+  LEFT JOIN presentaciones p ON p.periodo_id=per.id
+    LEFT JOIN tipos_formulario tf ON tf.id=p.tipo_formulario_id
+  */
   $countSql = "
     SELECT COUNT(DISTINCT c.id, per.anio, per.mes) as total
     FROM clientes c
     LEFT JOIN periodos per ON per.cliente_id=c.id
-    LEFT JOIN presentaciones p ON p.periodo_id=per.id
-    LEFT JOIN tipos_formulario tf ON tf.id=p.tipo_formulario_id
     WHERE per.anio IS NOT NULL AND per.mes IS NOT NULL
   ";
   $totalResult = $pdo->query($countSql)->fetch(PDO::FETCH_ASSOC);
@@ -177,7 +187,7 @@ function fechaPeriodo($anio,$mes){
                     <i class="fas fa-file-alt mr-3 text-gray-500"></i>
                     Consolidado
                 </a>
-                <a href="../cliente/perfil_contador.html" id="perfil-tab" class="sidebar-item flex items-center p-3 rounded-lg">
+                <a href="../cliente/perfil_contador.php" id="perfil-tab" class="sidebar-item flex items-center p-3 rounded-lg">
                     <i class="fas fa-user-circle mr-3 text-gray-500"></i>
                     Mi Perfil
                 </a>
@@ -199,9 +209,17 @@ function fechaPeriodo($anio,$mes){
                             <input id="filtroTexto" type="text" placeholder="Filtrar" class="search-box pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-indigo-500">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         </div>
-                        <div class="flex items-center">
-                            <img src="https://placehold.co/40x40" alt="Foto perfil" class="h-8 w-8 rounded-full mr-2">
-                            <span class="text-sm font-medium">Contador Ejemplo</span>
+                        <div class="flex items-center space-x-4">
+                          <div class="flex items-center">
+                              <img src="https://placehold.co/40x40" alt="Foto perfil" class="h-8 w-8 rounded-full mr-2">
+                              <span class="text-sm font-medium">
+                                  <?php echo isset($_SESSION["usuario"]["nombre"]) ? h($_SESSION["usuario"]["nombre"]) : "Usuario"; ?>
+                              </span>
+                          </div>
+                          <a href="PHP/logout.php" 
+                            class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition text-sm">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Cerrar sesión
+                          </a>
                         </div>
                     </div>
                 </div>

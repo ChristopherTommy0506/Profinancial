@@ -2,6 +2,13 @@
 /* cliente/consolidado.php — Consolidado con modo edición tipo Excel (SSR + fetch)
    Ajusta credenciales:
 */
+session_start();
+
+//  Verificar sesión activa
+if (!isset($_SESSION["usuario"])) {
+    header("Location: login/login.html");
+    exit();
+}
 $DB_HOST='localhost';
 $DB_NAME='profinancial_crm';
 $DB_USER='root';
@@ -291,7 +298,7 @@ try {
           <a href="../cliente/consolidado.php" class="sidebar-item flex items-center p-3 rounded-lg">
             <i class="fas fa-file-alt mr-3 text-gray-500"></i> Consolidado
           </a>
-          <a href="../cliente/perfil_contador.html" class="sidebar-item flex items-center p-3 rounded-lg">
+          <a href="../cliente/perfil_contador.php" class="sidebar-item flex items-center p-3 rounded-lg">
             <i class="fas fa-user-circle mr-3 text-gray-500"></i> Mi Perfil
           </a>
         </div>
