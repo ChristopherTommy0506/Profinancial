@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 29-08-2025 a las 23:31:52
+-- Tiempo de generación: 03-09-2025 a las 20:50:17
 -- Versión del servidor: 9.1.0
 -- Versión de PHP: 8.3.14
 
@@ -77,6 +77,25 @@ CREATE TABLE IF NOT EXISTS `asignaciones_cliente` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `auditoria`
+--
+
+DROP TABLE IF EXISTS `auditoria`;
+CREATE TABLE IF NOT EXISTS `auditoria` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `usuario_id` bigint NOT NULL,
+  `accion` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `modulo` enum('IVA','PA','CONTABILIDAD','PLANILLA') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `detalle` json DEFAULT NULL,
+  `ip` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_auditoria_usuario` (`usuario_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `bitacora_actividad`
 --
 
@@ -94,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `bitacora_actividad` (
   KEY `idx_bitacora_usuario` (`usuario_id`),
   KEY `idx_bitacora_accion` (`accion`),
   KEY `idx_bitacora_entidad` (`entidad`,`entidad_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `bitacora_actividad`
@@ -194,7 +213,32 @@ INSERT INTO `bitacora_actividad` (`id`, `usuario_id`, `accion`, `entidad`, `enti
 (91, NULL, 'CREAR_CLIENTE', 'clientes', 15, '{\"nit\": \"017026360\", \"nrc\": \"253263269\", \"nombre\": \"Julio\"}', NULL, '2025-08-29 23:01:49'),
 (92, NULL, 'CREAR_CLIENTE', 'clientes', 16, '{\"nit\": \"01702630000\", \"nrc\": \"25326326\", \"nombre\": \"Julio\"}', NULL, '2025-08-29 23:05:51'),
 (93, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-08-29 23:19:23'),
-(94, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-08-29 23:19:24');
+(94, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-08-29 23:19:24'),
+(95, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 10, '{\"antes\": {\"nit\": \"0614-101010-010-9\", \"nrc\": \"20010-0\", \"nombre\": \"Kappa Servicios S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-101010-010-9\", \"nrc\": \"20010-0\", \"nombre\": \"Kappa Servicios S.A. de C.V.\"}}', NULL, '2025-09-01 21:29:35'),
+(96, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 10, '{\"antes\": {\"nit\": \"0614-101010-010-9\", \"nrc\": \"20010-0\", \"nombre\": \"Kappa Servicios S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-101010-010-9\", \"nrc\": \"20010-0\", \"nombre\": \"Kappa Servicios S.A. de C.V.\"}}', NULL, '2025-09-01 21:29:35'),
+(97, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 14, '{\"antes\": {\"nit\": \"017026309\", \"nrc\": \"253263269\", \"nombre\": \"Julio\"}, \"despues\": {\"nit\": \"017026309\", \"nrc\": \"253263269\", \"nombre\": \"Julio\"}}', NULL, '2025-09-01 21:47:50'),
+(98, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 14, '{\"antes\": {\"nit\": \"017026309\", \"nrc\": \"253263269\", \"nombre\": \"Julio\"}, \"despues\": {\"nit\": \"017026309\", \"nrc\": \"253263269\", \"nombre\": \"Julio\"}}', NULL, '2025-09-01 21:47:50'),
+(99, NULL, 'CREAR_CLIENTE', 'clientes', 17, '{\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}', NULL, '2025-09-01 21:49:31'),
+(100, NULL, 'CREAR_CLIENTE', 'clientes', 18, '{\"nit\": \"0170263000077\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo j\"}', NULL, '2025-09-01 21:50:17'),
+(101, NULL, 'CREAR_CLIENTE', 'clientes', 19, '{\"nit\": \"01702630000773\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo ja\"}', NULL, '2025-09-01 21:57:20'),
+(102, NULL, 'CREAR_CLIENTE', 'clientes', 20, '{\"nit\": \"017026300007733\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo jac\"}', NULL, '2025-09-01 22:04:30'),
+(103, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 17, '{\"antes\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}, \"despues\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}}', NULL, '2025-09-01 22:21:06'),
+(104, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 17, '{\"antes\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}, \"despues\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}}', NULL, '2025-09-01 22:21:06'),
+(105, NULL, 'CREAR_CLIENTE', 'clientes', 21, '{\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}', NULL, '2025-09-01 22:22:59'),
+(106, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 21, '{\"antes\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}, \"despues\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}}', NULL, '2025-09-01 22:24:20'),
+(107, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 21, '{\"antes\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}, \"despues\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}}', NULL, '2025-09-01 22:24:21'),
+(108, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 21, '{\"antes\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}, \"despues\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}}', NULL, '2025-09-01 23:10:04'),
+(109, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 21, '{\"antes\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}, \"despues\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}}', NULL, '2025-09-01 23:10:20'),
+(110, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 21, '{\"antes\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}, \"despues\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}}', NULL, '2025-09-01 23:10:28'),
+(111, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 21, '{\"antes\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}, \"despues\": {\"nit\": \"0170263000077333\", \"nrc\": \"253263263\", \"nombre\": \"Rodrigo jaci\"}}', NULL, '2025-09-01 23:11:21'),
+(112, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 3, '{\"antes\": {\"nit\": \"0614-100303-003-2\", \"nrc\": \"20003-3\", \"nombre\": \"Cobalto Foods S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100303-003-2\", \"nrc\": \"20003-3\", \"nombre\": \"Cobalto Foods S.A. de C.V.\"}}', NULL, '2025-09-01 23:11:56'),
+(113, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 2, '{\"antes\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}}', NULL, '2025-09-01 23:12:57'),
+(114, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 2, '{\"antes\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}}', NULL, '2025-09-01 23:29:07'),
+(115, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-01 23:29:32'),
+(116, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-01 23:29:54'),
+(117, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-01 23:30:21'),
+(118, 2, 'ACTUALIZAR_USUARIO', 'usuarios', 2, '{\"antes\": {\"email\": \"jrsanchezjacinto72@gmail.com\", \"activo\": 1, \"nombre\": \"Julio Rodrigo Sanchez Jacinto\"}, \"despues\": {\"email\": \"jrsanchezjacinto72@gmail.com\", \"activo\": 1, \"nombre\": \"Julio Rodrigo Sanchez Jacintoo\"}}', NULL, '2025-09-03 20:44:55'),
+(119, 2, 'ACTUALIZAR_USUARIO', 'usuarios', 2, '{\"nombre\": {\"antes\": \"Julio Rodrigo Sanchez Jacinto\", \"despues\": \"Julio Rodrigo Sanchez Jacintoo\"}}', NULL, '2025-09-03 20:44:55');
 
 -- --------------------------------------------------------
 
@@ -221,7 +265,7 @@ CREATE TABLE IF NOT EXISTS `clientes` (
   `declaracion_iva` enum('documento pendiente','pendiente de procesar','en proceso','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
   `declaracion_pa` enum('documento pendiente','pendiente de procesar','en proceso','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
   `declaracion_planilla` enum('documento pendiente','pendiente de procesar','en proceso','presentada','pagada') COLLATE utf8mb4_unicode_ci DEFAULT 'documento pendiente',
-  `declaracion_contabilidad` enum('pendiente de procesar','en proceso','presentada') COLLATE utf8mb4_unicode_ci DEFAULT 'pendiente de procesar',
+  `declaracion_contabilidad` enum('documento pendiente','pendiente de procesar','en proceso','presentada') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pendiente de procesar',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_clientes_ident` (`nit`,`nrc`),
   KEY `idx_clientes_nombre` (`nombre`),
@@ -229,28 +273,33 @@ CREATE TABLE IF NOT EXISTS `clientes` (
   KEY `idx_declaracion_pa` (`declaracion_pa`),
   KEY `idx_declaracion_planilla` (`declaracion_planilla`),
   KEY `idx_declaracion_contabilidad` (`declaracion_contabilidad`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `clientes`
 --
 
 INSERT INTO `clientes` (`id`, `nombre`, `nit`, `nrc`, `contacto`, `telefono`, `email`, `clave_hacienda`, `clave_planilla`, `contador`, `direccion`, `activo`, `creado_en`, `actualizado_en`, `declaracion_iva`, `declaracion_pa`, `declaracion_planilla`, `declaracion_contabilidad`) VALUES
-(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-01', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-08-29 23:19:24', 'presentada', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'AH-BRI-2025', 'PL-BRI-02', 'Luis Herrera', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(3, 'Cobalto Foods S.A. de C.V.', '0614-100303-003-2', '20003-3', 'Carla Ramos', '+503 2222 3003', 'finanzas@cobaltofoods.com', 'AH-COB-2025', 'PL-COB-03', 'Carolina Gómez', 'Santa Tecla, La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-01', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-09-01 23:30:21', 'pagada', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'AH-BRI-2025', 'PL-BRI-02', 'Luis Herrera', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', '2025-09-01 23:29:07', 'documento pendiente', 'en proceso', 'pagada', 'pendiente de procesar'),
+(3, 'Cobalto Foods S.A. de C.V.', '0614-100303-003-2', '20003-3', 'Carla Ramos', '+503 2222 3003', 'finanzas@cobaltofoods.com', 'AH-COB-2025', 'PL-COB-03', 'Carolina Gómez', 'Santa Tecla, La Libertad', 1, '2025-08-18 23:39:07', '2025-09-01 23:11:56', 'en proceso', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (4, 'Eclipse Retail S.A. de C.V.', '0614-100404-004-3', '20004-4', 'Eduardo Molina', '+503 2222 4004', 'contacto@eclipseretail.com', 'AH-ECL-2025', 'PL-ECL-04', 'Eduardo Rivera', 'Antiguo Cuscatlán', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (5, 'Fénix Agro S.A. de C.V.', '0614-100505-005-4', '20005-5', 'Fernanda Cruz', '+503 2222 5005', 'info@fenixagro.com', 'AH-FEN-2025', 'PL-FEN-05', 'Fernanda Soto', 'Soyapango', 1, '2025-08-18 23:39:07', '2025-08-29 22:15:08', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (6, 'Galaxia Media S.A. de C.V.', '0614-100606-006-5', '20006-6', 'Gabriela Soto', '+503 2222 6006', 'contacto@galaxiamedia.com', 'AH-GAL-2025', 'PL-GAL-06', 'Gabriela Núñez', 'Santa Tecla', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (7, 'Horizonte Construcciones S.A. de C.V.', '0614-100707-007-6', '20007-7', 'Héctor Pineda', '+503 2222 7007', 'proyectos@horizonte.com', 'AH-HOR-2025', 'PL-HOR-07', 'Héctor Ramos', 'San Miguel', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (8, 'Ícaro Travel S.A. de C.V.', '0614-100808-008-7', '20008-8', 'Irene Lazo', '+503 2222 8008', 'ventas@icarotravel.com', 'AH-ICA-2025', 'PL-ICA-08', 'Irene Morales', 'La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (9, 'Jaguar Security S.A. de C.V.', '0614-100909-009-8', '20009-9', 'Javier Campos', '+503 2222 9009', 'operaciones@jaguarsec.com', 'AH-JAG-2025', 'PL-JAG-09', 'Javier Pineda', 'San Salvador, Centro', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(10, 'Kappa Servicios S.A. de C.V.', '0614-101010-010-9', '20010-0', 'Karla Mejía', '+503 2222 1010', 'soporte@kappasv.com', NULL, NULL, NULL, 'Mejicanos', 1, '2025-08-18 23:39:07', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(10, 'Kappa Servicios S.A. de C.V.', '0614-101010-010-9', '20010-0', 'Karla Mejía', '+503 2222 1010', 'soporte@kappasv.com', '', '', '', 'Mejicanos', 1, '2025-08-18 23:39:07', '2025-09-01 21:29:35', 'pagada', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (12, 'Juan', '01702630', '25326326', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170291', 'Jose', 'Calle', 1, '2025-08-29 20:52:31', '2025-08-29 21:35:40', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (13, 'tommy', '017026300', '253263260', 'messi', '75747039', 'jr@gmail.com', '20170295', '20170295', 'Jose', 'Colonia Zacamil', 1, '2025-08-29 21:45:42', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(14, 'Julio', '017026309', '253263269', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170293', 'Jose', 'Calle', 1, '2025-08-29 22:52:24', NULL, 'presentada', 'presentada', 'pagada', ''),
+(14, 'Julio', '017026309', '253263269', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170293', 'Jose', 'Calle', 1, '2025-08-29 22:52:24', '2025-09-01 21:47:50', 'presentada', 'presentada', 'pagada', 'presentada'),
 (15, 'Julio', '017026360', '253263269', 'messi', '75747039', 'jr@gmail.com', '20354982', '20354982', 'Jose', 'Calle', 1, '2025-08-29 23:01:49', NULL, 'presentada', 'presentada', 'presentada', 'en proceso'),
-(16, 'Julio', '01702630000', '25326326', 'messi', '75747039', 'jr@gmail.com', '2', '2', 'Jose', 'Calle', 1, '2025-08-29 23:05:51', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', '');
+(16, 'Julio', '01702630000', '25326326', 'messi', '75747039', 'jr@gmail.com', '2', '2', 'Jose', 'Calle', 1, '2025-08-29 23:05:51', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', ''),
+(17, 'Rodrigo', '017026300007', '25326326', 'messi', '75747039', 'jr@gmail.com', '12345678', '123456789', 'Jose', 'Colonia Zacamil', 1, '2025-09-01 21:49:31', '2025-09-01 22:21:06', 'pagada', 'pagada', 'pagada', 'presentada'),
+(18, 'Rodrigo j', '0170263000077', '25326326', 'messi', '75747039', 'jr@gmail.com', '17171', '171717', 'Jose', 'Colonia Zacamil', 1, '2025-09-01 21:50:17', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', ''),
+(19, 'Rodrigo ja', '01702630000773', '25326326', 'messi', '75747039', 'jr@gmail.com', '2', '2', 'Jose', '', 1, '2025-09-01 21:57:20', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', ''),
+(20, 'Rodrigo jac', '017026300007733', '25326326', 'messi', '75747039', 'jr@gmail.com', '30', '30', 'Jose', 'Colonia Zacamil', 1, '2025-09-01 22:04:30', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'documento pendiente'),
+(21, 'Rodrigo jaci', '0170263000077333', '253263263', 'Tommy', '75747039', 'jr72@gmail.com', '12', '12', 'Jose', '', 1, '2025-09-01 22:22:59', '2025-09-01 23:11:21', 'en proceso', 'presentada', 'pagada', 'documento pendiente');
 
 --
 -- Disparadores `clientes`
@@ -273,6 +322,39 @@ CREATE TRIGGER `trg_clientes_au` AFTER UPDATE ON `clientes` FOR EACH ROW BEGIN
             'antes',   JSON_OBJECT('nombre', OLD.nombre, 'nit', OLD.nit, 'nrc', OLD.nrc),
             'despues', JSON_OBJECT('nombre', NEW.nombre, 'nit', NEW.nit, 'nrc', NEW.nrc)
           ));
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_clientes_auditoria`;
+DELIMITER $$
+CREATE TRIGGER `trg_clientes_auditoria` AFTER UPDATE ON `clientes` FOR EACH ROW BEGIN
+  -- Si cambia el estado de IVA
+  IF (OLD.declaracion_iva <> NEW.declaracion_iva) THEN
+    INSERT INTO auditoria (usuario_id, accion, modulo, detalle)
+    VALUES (NULLIF(@current_user_id,0), 'CAMBIO_ESTADO', 'IVA',
+            JSON_OBJECT('antes', OLD.declaracion_iva, 'despues', NEW.declaracion_iva));
+  END IF;
+
+  -- Si cambia el estado de PA
+  IF (OLD.declaracion_pa <> NEW.declaracion_pa) THEN
+    INSERT INTO auditoria (usuario_id, accion, modulo, detalle)
+    VALUES (NULLIF(@current_user_id,0), 'CAMBIO_ESTADO', 'PA',
+            JSON_OBJECT('antes', OLD.declaracion_pa, 'despues', NEW.declaracion_pa));
+  END IF;
+
+  -- Si cambia el estado de PLANILLA
+  IF (OLD.declaracion_planilla <> NEW.declaracion_planilla) THEN
+    INSERT INTO auditoria (usuario_id, accion, modulo, detalle)
+    VALUES (NULLIF(@current_user_id,0), 'CAMBIO_ESTADO', 'PLANILLA',
+            JSON_OBJECT('antes', OLD.declaracion_planilla, 'despues', NEW.declaracion_planilla));
+  END IF;
+
+  -- Si cambia el estado de CONTABILIDAD
+  IF (OLD.declaracion_contabilidad <> NEW.declaracion_contabilidad) THEN
+    INSERT INTO auditoria (usuario_id, accion, modulo, detalle)
+    VALUES (NULLIF(@current_user_id,0), 'CAMBIO_ESTADO', 'CONTABILIDAD',
+            JSON_OBJECT('antes', OLD.declaracion_contabilidad, 'despues', NEW.declaracion_contabilidad));
+  END IF;
 END
 $$
 DELIMITER ;
@@ -323,7 +405,7 @@ CREATE TABLE IF NOT EXISTS `periodos` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_periodo` (`cliente_id`,`anio`,`mes`),
   KEY `idx_periodo_anio_mes` (`anio`,`mes`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Volcado de datos para la tabla `periodos`
@@ -344,7 +426,12 @@ INSERT INTO `periodos` (`id`, `cliente_id`, `anio`, `mes`, `creado_en`) VALUES
 (12, 13, 2025, 8, '2025-08-29 21:45:42'),
 (13, 14, 2025, 8, '2025-08-29 22:52:24'),
 (14, 15, 2025, 8, '2025-08-29 23:01:49'),
-(15, 16, 2025, 8, '2025-08-29 23:05:51');
+(15, 16, 2025, 8, '2025-08-29 23:05:51'),
+(16, 17, 2025, 9, '2025-09-01 21:49:31'),
+(17, 18, 2025, 9, '2025-09-01 21:50:17'),
+(18, 19, 2025, 9, '2025-09-01 21:57:20'),
+(19, 20, 2025, 9, '2025-09-01 22:04:30'),
+(20, 21, 2025, 9, '2025-09-01 22:22:59');
 
 -- --------------------------------------------------------
 
@@ -512,20 +599,6 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `roles`
---
-
-DROP TABLE IF EXISTS `roles`;
-CREATE TABLE IF NOT EXISTS `roles` (
-  `id` tinyint NOT NULL,
-  `nombre` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `tipos_formulario`
 --
 
@@ -562,14 +635,131 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `nombre` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `rol_id` tinyint NOT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_en` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`),
-  KEY `fk_usuarios_rol` (`rol_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password_hash`, `activo`, `creado_en`, `actualizado_en`) VALUES
+(2, 'Julio Rodrigo Sanchez Jacintoo', 'jrsanchezjacinto72@gmail.com', '$2y$10$OAaDeW6w0y.itts1MrVTmes8ClrK6IB9a57JRXRjIQKW5sQ9kBX.e', 1, '2025-09-03 17:29:40', '2025-09-03 20:44:55'),
+(3, 'Julio Rodrigo Sánchez Jacinto', 'jr@gmail.com', '$2y$10$KV9aw9IfvEDr6ixbFoJpH.EBI5sAMJEBOvnGrDpFt9SVoYIj/oMI.', 1, '2025-09-03 17:33:31', NULL);
+
+--
+-- Disparadores `usuarios`
+--
+DROP TRIGGER IF EXISTS `trg_usuarios_ad`;
+DELIMITER $$
+CREATE TRIGGER `trg_usuarios_ad` AFTER DELETE ON `usuarios` FOR EACH ROW BEGIN
+  INSERT INTO bitacora_actividad (usuario_id, accion, entidad, entidad_id, detalle)
+  VALUES (NULLIF(@current_user_id,0), 'ELIMINAR_USUARIO', 'usuarios', OLD.id,
+          JSON_OBJECT(
+            'nombre', OLD.nombre,
+            'email', OLD.email
+          ));
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_usuarios_ai`;
+DELIMITER $$
+CREATE TRIGGER `trg_usuarios_ai` AFTER INSERT ON `usuarios` FOR EACH ROW BEGIN
+  INSERT INTO bitacora_actividad (usuario_id, accion, entidad, entidad_id, detalle)
+  VALUES (NEW.id, 'CREAR_USUARIO', 'usuarios', NEW.id,
+          JSON_OBJECT(
+            'nombre', NEW.nombre,
+            'email', NEW.email,
+            'activo', NEW.activo
+          ));
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_usuarios_au`;
+DELIMITER $$
+CREATE TRIGGER `trg_usuarios_au` AFTER UPDATE ON `usuarios` FOR EACH ROW BEGIN
+  -- Registrar cambios en la bitácora
+  INSERT INTO bitacora_actividad (usuario_id, accion, entidad, entidad_id, detalle)
+  VALUES (NEW.id, 'ACTUALIZAR_USUARIO', 'usuarios', NEW.id,
+          JSON_OBJECT(
+            'antes', JSON_OBJECT(
+              'nombre', OLD.nombre,
+              'email', OLD.email,
+              'activo', OLD.activo
+            ),
+            'despues', JSON_OBJECT(
+              'nombre', NEW.nombre,
+              'email', NEW.email,
+              'activo', NEW.activo
+            )
+          ));
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_usuarios_au_detallado`;
+DELIMITER $$
+CREATE TRIGGER `trg_usuarios_au_detallado` AFTER UPDATE ON `usuarios` FOR EACH ROW BEGIN
+  DECLARE cambios JSON;
+  SET cambios = JSON_OBJECT();
+  
+  -- Detectar cambios en el nombre
+  IF OLD.nombre != NEW.nombre THEN
+    SET cambios = JSON_SET(cambios, '$.nombre', JSON_OBJECT('antes', OLD.nombre, 'despues', NEW.nombre));
+  END IF;
+  
+  -- Detectar cambios en el email
+  IF OLD.email != NEW.email THEN
+    SET cambios = JSON_SET(cambios, '$.email', JSON_OBJECT('antes', OLD.email, 'despues', NEW.email));
+  END IF;
+  
+  -- Detectar cambios en el estado activo
+  IF OLD.activo != NEW.activo THEN
+    SET cambios = JSON_SET(cambios, '$.activo', JSON_OBJECT('antes', OLD.activo, 'despues', NEW.activo));
+  END IF;
+  
+  -- Solo registrar si hubo cambios reales
+  IF JSON_LENGTH(cambios) > 0 THEN
+    INSERT INTO bitacora_actividad (usuario_id, accion, entidad, entidad_id, detalle)
+    VALUES (NEW.id, 'ACTUALIZAR_USUARIO', 'usuarios', NEW.id, cambios);
+  END IF;
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_usuarios_password_change`;
+DELIMITER $$
+CREATE TRIGGER `trg_usuarios_password_change` AFTER UPDATE ON `usuarios` FOR EACH ROW BEGIN
+  -- Verificar si la contraseña cambió
+  IF OLD.password_hash != NEW.password_hash THEN
+    INSERT INTO bitacora_actividad (usuario_id, accion, entidad, entidad_id, detalle)
+    VALUES (NEW.id, 'CAMBIAR_CONTRASENA', 'usuarios', NEW.id,
+            JSON_OBJECT(
+              'fecha', NOW(),
+              'usuario_afectado', NEW.nombre
+            ));
+  END IF;
+END
+$$
+DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_usuarios_protect_delete`;
+DELIMITER $$
+CREATE TRIGGER `trg_usuarios_protect_delete` BEFORE DELETE ON `usuarios` FOR EACH ROW BEGIN
+  -- Verificar si el usuario tiene asignaciones de clientes
+  IF EXISTS (SELECT 1 FROM asignaciones_cliente WHERE usuario_id = OLD.id LIMIT 1) THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'No puede eliminarse el usuario: tiene clientes asignados.';
+  END IF;
+  
+  -- Verificar si el usuario tiene presentaciones realizadas
+  IF EXISTS (SELECT 1 FROM presentaciones WHERE presentado_por = OLD.id LIMIT 1) THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'No puede eliminarse el usuario: tiene presentaciones realizadas.';
+  END IF;
+END
+$$
+DELIMITER ;
 
 --
 -- Restricciones para tablas volcadas
@@ -583,6 +773,12 @@ ALTER TABLE `asignaciones_cliente`
   ADD CONSTRAINT `fk_asig_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
 
 --
+-- Filtros para la tabla `auditoria`
+--
+ALTER TABLE `auditoria`
+  ADD CONSTRAINT `fk_auditoria_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `bitacora_actividad`
 --
 ALTER TABLE `bitacora_actividad`
@@ -593,12 +789,6 @@ ALTER TABLE `bitacora_actividad`
 --
 ALTER TABLE `credenciales_cliente`
   ADD CONSTRAINT `fk_cred_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`);
-
---
--- Filtros para la tabla `usuarios`
---
-ALTER TABLE `usuarios`
-  ADD CONSTRAINT `fk_usuarios_rol` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

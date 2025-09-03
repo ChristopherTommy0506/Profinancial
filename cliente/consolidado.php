@@ -1,18 +1,41 @@
 <?php
-/* cliente/consolidado.php — Consolidado con modo edición tipo Excel (SSR + fetch)
-   Ajusta credenciales:
-*/
+/* cliente/consolidado.php — Consolidado con modo edición tipo Excel (SSR + fetch) */
 session_start();
 
-//  Verificar sesión activa
+// Verificar sesión activa
 if (!isset($_SESSION["usuario"])) {
     header("Location: login/login.html");
     exit();
 }
-$DB_HOST='localhost';
-$DB_NAME='profinancial_crm';
-$DB_USER='root';
-$DB_PASS=''; // <--- AJUSTA
+
+// Función para obtener conexión PDO con variables de usuario
+function getPDO() {
+    $DB_HOST = 'localhost';
+    $DB_NAME = 'profinancial_crm';
+    $DB_USER = 'root';
+    $DB_PASS = '';
+    
+    $pdo = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4", $DB_USER, $DB_PASS, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+    
+    // Establecer variables de usuario para triggers
+    $user_id = 1;
+    
+    if (isset($_SESSION['usuario']) && !empty($_SESSION['usuario']['id'])) {
+        $user_id = $_SESSION['usuario']['id'];
+        
+        // Establecer variables de sesión MySQL para triggers
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        
+        $pdo->exec("SET @current_user_id = $user_id");
+        $pdo->exec("SET @current_user_ip = " . $pdo->quote($ip));
+        $pdo->exec("SET @current_user_agent = " . $pdo->quote(substr($user_agent, 0, 255)));
+    }
+    
+    return $pdo;
+}
 
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function monthName($m){
@@ -24,8 +47,9 @@ function monthName($m){
 if ($_SERVER['REQUEST_METHOD']==='POST') {
   header('Content-Type: application/json; charset=utf-8');
   $action = $_POST['action'] ?? '';
+  
   try {
-    $pdo = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4",$DB_USER,$DB_PASS,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+    $pdo = getPDO();
 
     if ($action==='update_cliente') {
       $id = (int)($_POST['id'] ?? 0);
@@ -70,7 +94,6 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         $v = strtolower(trim($val));
         switch ($tipo) {
           case 'declaracion_iva':
-            // Para IVA: documentos pendiente, pendiente de procesar, en proceso, presentada, pagada
             if ($v==='documentos pendiente') return 'documento pendiente';
             if ($v==='pendiente de procesar') return 'pendiente de procesar';
             if ($v==='en proceso') return 'en proceso';
@@ -78,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             if ($v==='pagada') return 'pagada';
             return 'documento pendiente';
           case 'declaracion_pa':
-            // Para PA: documentos pendiente, pendiente de procesar, en proceso, presentada, pagada
             if ($v==='documentos pendiente') return 'documento pendiente';
             if ($v==='pendiente de procesar') return 'pendiente de procesar';
             if ($v==='en proceso') return 'en proceso';
@@ -86,7 +108,6 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             if ($v==='pagada') return 'pagada';
             return 'documento pendiente';
           case 'declaracion_planilla':
-            // Para Planilla: documentos pendiente, pendiente de procesar, en proceso, presentada, pagada
             if ($v==='documentos pendiente') return 'documento pendiente';
             if ($v==='pendiente de procesar') return 'pendiente de procesar';
             if ($v==='en proceso') return 'en proceso';
@@ -94,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             if ($v==='pagada') return 'pagada';
             return 'documento pendiente';
           case 'declaracion_contabilidad':
-            // Para Contabilidad: documentos pendiente, pendiente de procesar, en proceso, presentada (sin pagada)
             if ($v==='documentos pendiente') return 'documento pendiente';
             if ($v==='pendiente de procesar') return 'pendiente de procesar';
             if ($v==='en proceso') return 'en proceso';
@@ -123,81 +143,132 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
       echo json_encode(['ok'=>true,'msg'=>'Estados actualizados']); exit;
     }
 
-    // Nuevo endpoint para autoguardado
+    // Nuevo endpoint para autoguardado con auditoría
     if ($action==='autosave') {
       $id = (int)($_POST['id'] ?? 0);
-      if ($id<=0) throw new Exception("ID inválido.");
+      if ($id <= 0) throw new Exception("ID inválido.");
 
       $field = $_POST['field'] ?? '';
       $value = $_POST['value'] ?? '';
       
-      if (!in_array($field, ['nombre', 'nit', 'contacto', 'telefono', 'email', 'contador', 'clave_hacienda', 'clave_planilla'])) {
+      // Campos permitidos para edición
+      $allowedFields = ['nombre', 'nit', 'nrc', 'contacto', 'telefono', 'email', 
+                       'clave_hacienda', 'clave_planilla', 'contador', 'direccion'];
+      
+      if (!in_array($field, $allowedFields)) {
         throw new Exception("Campo no permitido.");
       }
 
-      $sql = "UPDATE clientes SET {$field} = ? WHERE id = ?";
-      $pdo->prepare($sql)->execute([$value, $id]);
-      
+      // Obtener valor anterior
+      $sqlOld = "SELECT $field FROM clientes WHERE id = ?";
+      $stmtOld = $pdo->prepare($sqlOld);
+      $stmtOld->execute([$id]);
+      $oldValue = $stmtOld->fetchColumn();
+
+      // Actualizar el campo
+      $sql = "UPDATE clientes SET {$field} = ?, actualizado_en = NOW() WHERE id = ?";
+      $stmt = $pdo->prepare($sql);
+      $stmt->execute([$value, $id]);
+
+      // Registrar en auditoría
+      if ($stmt->rowCount() > 0) {
+        $usuarioId = $_SESSION['usuario']['id'] ?? 1;
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        
+        // Insertar en auditoría usando la nueva estructura
+        $sqlAudit = "INSERT INTO auditoria (usuario_id, accion, modulo, cliente_id, campo_afectado, valor_anterior, valor_nuevo, ip, user_agent, detalle) 
+                     VALUES (?, 'ACTUALIZAR', 'CLIENTE', ?, ?, ?, ?, ?, ?, ?)";
+        $stmtAudit = $pdo->prepare($sqlAudit);
+        
+        // Crear detalle JSON para mantener compatibilidad
+        $detalleJson = json_encode([
+            'tipo' => 'campo_cliente',
+            'campo' => $field,
+            'valor_anterior' => $oldValue,
+            'valor_nuevo' => $value,
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
+        
+        $stmtAudit->execute([$usuarioId, $id, $field, $oldValue, $value, $ip, $userAgent, $detalleJson]);
+      }
+
       echo json_encode(['ok'=>true,'msg'=>'Campo autoguardado']); exit;
     }
 
-    // Nuevo endpoint para autoguardado de estados
+    // Nuevo endpoint para autoguardado de estados con auditoría
     if ($action==='autosave_estado') {
       $id = (int)($_POST['id'] ?? 0);
-      if ($id<=0) throw new Exception("ID inválido.");
+      if ($id <= 0) throw new Exception("ID inválido.");
 
       $tipo = $_POST['tipo'] ?? '';
       $valor = $_POST['valor'] ?? '';
       
-      $mapEstado = function($tipo, $val) {
-        $v = strtolower(trim($val));
-        switch ($tipo) {
-          case 'iva': case 'declaracion_iva':
-            if ($v==='documentos pendiente') return 'documento pendiente';
-            if ($v==='pendiente de procesar') return 'pendiente de procesar';
-            if ($v==='en proceso') return 'en proceso';
-            if ($v==='presentada') return 'presentada';
-            if ($v==='pagada') return 'pagada';
-            return 'documento pendiente';
-          case 'pa': case 'declaracion_pa':
-            if ($v==='documentos pendiente') return 'documento pendiente';
-            if ($v==='pendiente de procesar') return 'pendiente de procesar';
-            if ($v==='en proceso') return 'en proceso';
-            if ($v==='presentada') return 'presentada';
-            if ($v==='pagada') return 'pagada';
-            return 'documento pendiente';
-          case 'planilla': case 'declaracion_planilla':
-            if ($v==='documentos pendiente') return 'documento pendiente';
-            if ($v==='pendiente de procesar') return 'pendiente de procesar';
-            if ($v==='en proceso') return 'en proceso';
-            if ($v==='presentada') return 'presentada';
-            if ($v==='pagada') return 'pagada';
-            return 'documento pendiente';
-          case 'conta': case 'declaracion_contabilidad':
-            if ($v==='documentos pendiente') return 'documento pendiente';
-            if ($v==='pendiente de procesar') return 'pendiente de procesar';
-            if ($v==='en proceso') return 'en proceso';
-            if ($v==='presentada') return 'presentada';
-            return 'documento pendiente';
-        }
-        return null;
-      };
-
-      $columna = '';
-      switch ($tipo) {
-        case 'iva': $columna = 'declaracion_iva'; break;
-        case 'pa': $columna = 'declaracion_pa'; break;
-        case 'planilla': $columna = 'declaracion_planilla'; break;
-        case 'conta': $columna = 'declaracion_contabilidad'; break;
-        default: throw new Exception("Tipo de estado no válido.");
+      // Mapear tipos a columnas de la base de datos
+      $columnMap = [
+        'iva' => 'declaracion_iva',
+        'pa' => 'declaracion_pa',
+        'planilla' => 'declaracion_planilla',
+        'conta' => 'declaracion_contabilidad'
+      ];
+      
+      if (!isset($columnMap[$tipo])) {
+        throw new Exception("Tipo de estado no válido.");
+      }
+      
+      $columna = $columnMap[$tipo];
+      
+      // Validar y mapear valor
+      $valoresPermitidos = [
+        'declaracion_iva' => ['documento pendiente', 'pendiente de procesar', 'en proceso', 'presentada', 'pagada'],
+        'declaracion_pa' => ['documento pendiente', 'pendiente de procesar', 'en proceso', 'presentada', 'pagada'],
+        'declaracion_planilla' => ['documento pendiente', 'pendiente de procesar', 'en proceso', 'presentada', 'pagada'],
+        'declaracion_contabilidad' => ['documento pendiente', 'pendiente de procesar', 'en proceso', 'presentada']
+      ];
+      
+      $valor = strtolower(trim($valor));
+      if (!in_array($valor, $valoresPermitidos[$columna])) {
+        throw new Exception("Valor de estado no válido.");
       }
 
-      $valorBD = $mapEstado($tipo, $valor);
-      if ($valorBD === null) throw new Exception("Valor de estado no válido.");
+      // Obtener valor anterior
+      $sqlOld = "SELECT $columna FROM clientes WHERE id = ?";
+      $stmtOld = $pdo->prepare($sqlOld);
+      $stmtOld->execute([$id]);
+      $oldValue = $stmtOld->fetchColumn();
 
-      $sql = "UPDATE clientes SET {$columna} = ? WHERE id = ?";
-      $pdo->prepare($sql)->execute([$valorBD, $id]);
-      
+      // Actualizar el estado
+      $sql = "UPDATE clientes SET {$columna} = ?, actualizado_en = NOW() WHERE id = ?";
+      $stmt = $pdo->prepare($sql);
+      $stmt->execute([$valor, $id]);
+
+      // Registrar en auditoría
+      if ($stmt->rowCount() > 0) {
+        $usuarioId = $_SESSION['usuario']['id'] ?? 1;
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        
+        // Determinar el módulo para auditoría
+        $modulo = strtoupper($tipo);
+        if ($tipo === 'conta') $modulo = 'CONTABILIDAD';
+        
+        // Insertar en auditoría usando la nueva estructura
+        $sqlAudit = "INSERT INTO auditoria (usuario_id, accion, modulo, cliente_id, campo_afectado, valor_anterior, valor_nuevo, ip, user_agent, detalle) 
+                     VALUES (?, 'ACTUALIZAR_ESTADO', ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmtAudit = $pdo->prepare($sqlAudit);
+        
+        // Crear detalle JSON para mantener compatibilidad
+        $detalleJson = json_encode([
+            'tipo' => 'estado_declaracion',
+            'declaracion' => $tipo,
+            'valor_anterior' => $oldValue,
+            'valor_nuevo' => $valor,
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
+        
+        $stmtAudit->execute([$usuarioId, $modulo, $id, $columna, $oldValue, $valor, $ip, $userAgent, $detalleJson]);
+      }
+
       echo json_encode(['ok'=>true,'msg'=>'Estado autoguardado']); exit;
     }
 
@@ -214,7 +285,7 @@ $anio = isset($_GET['anio']) && $_GET['anio']!=='' ? (int)$_GET['anio'] : null;
 $mes  = isset($_GET['mes'])  && $_GET['mes']  !=='' ? (int)$_GET['mes']  : null;
 
 try {
-  $pdo = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4",$DB_USER,$DB_PASS,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+  $pdo = getPDO();
 
   // Años y meses para combos (de la tabla periodos)
   $years = $pdo->query("SELECT DISTINCT anio FROM periodos ORDER BY anio DESC")->fetchAll(PDO::FETCH_COLUMN);
@@ -249,6 +320,24 @@ try {
   $st = $pdo->prepare($sql); $st->execute();
   $rows = $st->fetchAll(PDO::FETCH_ASSOC);
 
+  // Obtener historial de auditoría reciente
+  $sqlHistorial = "
+        SELECT 
+            a.fecha, 
+            u.nombre as usuario, 
+            a.accion, 
+            a.modulo,
+            a.detalle,
+            a.ip
+        FROM auditoria a
+        LEFT JOIN usuarios u ON a.usuario_id = u.id
+        ORDER BY a.fecha DESC 
+        LIMIT 10
+  ";
+  
+  $stmHistorial = $pdo->query($sqlHistorial);
+  $historial = $stmHistorial->fetchAll(PDO::FETCH_ASSOC);
+  
 } catch(Throwable $e){
   http_response_code(500);
   echo '<!doctype html><meta charset="utf-8"><pre style="padding:16px;color:#b91c1c">Error: '.h($e->getMessage()).'</pre>'; exit;
@@ -428,6 +517,61 @@ try {
           <?php endif; ?>
           </tbody>
         </table>
+      </div>
+
+      <!-- Sección de historial de cambios -->
+<div class="mt-8 bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-lg font-semibold mb-4">📝 Historial reciente de cambios</h3>
+    
+    <?php if ($historial): ?>
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm text-left text-gray-700">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-3 py-2">Fecha</th>
+                    <th class="px-3 py-2">Usuario</th>
+                    <th class="px-3 py-2">Módulo</th>
+                    <th class="px-3 py-2">Acción</th>
+                    <th class="px-3 py-2">Detalles</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($historial as $h): 
+                    // Parsear el JSON del campo detalle
+                    $detalle = !empty($h['detalle']) ? json_decode($h['detalle'], true) : [];
+                    $campo = $detalle['campo'] ?? $detalle['campo_afectado'] ?? '';
+                    $valorAnterior = $detalle['valor_anterior'] ?? '';
+                    $valorNuevo = $detalle['valor_nuevo'] ?? '';
+                    $cliente = $detalle['cliente'] ?? '';
+                ?>
+                <tr class="border-b">
+                    <td class="px-3 py-2"><?= date('d/m H:i', strtotime($h['fecha'])) ?></td>
+                    <td class="px-3 py-2"><?= h($h['usuario'] ?? 'Sistema') ?></td>
+                    <td class="px-3 py-2"><?= h($h['modulo'] ?? '') ?></td>
+                    <td class="px-3 py-2"><?= h($h['accion'] ?? '') ?></td>
+                    <td class="px-3 py-2">
+                        <?php if (!empty($campo)): ?>
+                            <div><strong><?= h($campo) ?>:</strong></div>
+                            <div>
+                                <span class="text-red-600 line-through"><?= h($valorAnterior) ?></span>
+                                → 
+                                <span class="text-green-600 font-semibold"><?= h($valorNuevo) ?></span>
+                            </div>
+                        <?php elseif (!empty($h['detalle'])): ?>
+                            <span class="text-gray-500"><?= h(substr($h['detalle'], 0, 100)) ?>...</span>
+                        <?php else: ?>
+                            <span class="text-gray-500">Sin detalles específicos</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php else: ?>
+    <p class="text-gray-500">No hay historial de cambios registrado.</p>
+    <?php endif; ?>
+</div>
       </div>
     </main>
   </div>
@@ -633,7 +777,7 @@ try {
             formData.append('valor', data.value);
           }
 
-          // Convertir FormData a URLSearchParams
+          // Convertir FormData to URLSearchParams
           const params = new URLSearchParams();
           for (const [key, value] of formData.entries()) {
             params.append(key, value);

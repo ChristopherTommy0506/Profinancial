@@ -1,14 +1,27 @@
+<?php
+session_start();
+
+// Verificar estado de login
+$logueado = isset($_SESSION['usuario']);
+
+if ($logueado) {
+    header("Location: cliente/index.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirigiendo...</title>
+  <title><?php echo $logueado ? 'Redirigiendo...' : 'Acceso requerido'; ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
+  <?php if (!$logueado): ?>
   <div class="text-center">
     <div class="flex justify-center mb-6">
       <div class="w-20 h-20 border-4 border-blue-600 border-dashed rounded-full animate-spin"></div>
@@ -29,6 +42,7 @@
       window.location.href = "cliente/login/login.html";
     });
   </script>
+  <?php endif; ?>
 
 </body>
 </html>
