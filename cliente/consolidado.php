@@ -342,6 +342,51 @@ try {
   http_response_code(500);
   echo '<!doctype html><meta charset="utf-8"><pre style="padding:16px;color:#b91c1c">Error: '.h($e->getMessage()).'</pre>'; exit;
 }
+
+// Generar CSV
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    try {
+        $pdo = getPDO();
+        $sqlCsv = "
+            SELECT 
+              nombre AS Cliente, 
+              nit AS NIT, 
+              contacto AS Contacto, 
+              telefono AS Telefono, 
+              email AS Correo,
+              contador AS Contador,
+              clave_hacienda AS ClaveHacienda,
+              clave_planilla AS ClavePlanilla,
+              declaracion_iva AS IVA,
+              declaracion_pa AS PA,
+              declaracion_planilla AS Planilla,
+              declaracion_contabilidad AS Contabilidad
+            FROM clientes
+            WHERE activo = 1
+            ORDER BY nombre ASC
+        ";
+        $stmtCsv = $pdo->query($sqlCsv);
+        $rowsCsv = $stmtCsv->fetchAll(PDO::FETCH_ASSOC);
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=consolidado_clientes.csv');
+        $output = fopen('php://output', 'w');
+        // Encabezados
+        if (!empty($rowsCsv)) {
+            fputcsv($output, array_keys($rowsCsv[0]));
+            foreach ($rowsCsv as $row) {
+                fputcsv($output, $row);
+            }
+        }
+        fclose($output);
+        exit;
+    } catch(Throwable $e){
+        http_response_code(500);
+        echo 'Error generando CSV: ' . h($e->getMessage());
+        exit;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -379,19 +424,22 @@ try {
           <span class="ml-2 text-white font-bold">Profinancial</span>
         </div>
       </div>
-      <nav class="flex-1 p-4">
-        <div class="space-y-2">
-          <a href="../cliente/index.php" class="sidebar-item flex items-center p-3 rounded-lg">
-            <i class="fas fa-users mr-3 text-gray-500"></i> Clientes
-          </a>
-          <a href="../cliente/consolidado.php" class="sidebar-item flex items-center p-3 rounded-lg">
-            <i class="fas fa-file-alt mr-3 text-gray-500"></i> Consolidado
-          </a>
-          <a href="../cliente/perfil_contador.php" class="sidebar-item flex items-center p-3 rounded-lg">
-            <i class="fas fa-user-circle mr-3 text-gray-500"></i> Mi Perfil
-          </a>
-        </div>
-      </nav>
+    <nav class="flex-1 p-4">
+      <div class="space-y-2">
+        <a href="../cliente/index.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-users mr-3 text-gray-500"></i> Clientes
+        </a>
+        <a href="../cliente/consolidado.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-file-alt mr-3 text-gray-500"></i> Consolidado
+        </a>
+        <a href="../cliente/historial.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-history mr-3 text-gray-500"></i> Historial
+        </a>
+        <a href="../cliente/perfil_contador.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-user-circle mr-3 text-gray-500"></i> Mi Perfil
+        </a>
+      </div>
+    </nav>
     </div>
 
     <!-- Contenido principal -->
@@ -422,6 +470,11 @@ try {
           <button id="editarTabla" type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
             <i class="fas fa-edit mr-2"></i><span>Editar Tabla</span>
           </button>
+
+          <button id="exportCsv" type="button" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center">
+          <i class="fas fa-file-csv mr-2"></i> Exportar CSV
+          </button>
+
 
           <div id="autoSaveStatus" class="autosave-status bg-gray-100 text-gray-600 hidden">
             <i class="fas fa-save mr-1"></i> <span>Auto-guardado activo</span>
@@ -518,64 +571,6 @@ try {
           </tbody>
         </table>
       </div>
-
-      <!-- Sección de historial de cambios -->
-<div class="mt-8 bg-white rounded-lg shadow-md p-6">
-    <h3 class="text-lg font-semibold mb-4">📝 Historial reciente de cambios</h3>
-    
-    <?php if ($historial): ?>
-    <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-left text-gray-700">
-            <thead class="bg-gray-200">
-                <tr>
-                    <th class="px-3 py-2">Fecha</th>
-                    <th class="px-3 py-2">Usuario</th>
-                    <th class="px-3 py-2">Módulo</th>
-                    <th class="px-3 py-2">Acción</th>
-                    <th class="px-3 py-2">Detalles</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($historial as $h): 
-                    // Parsear el JSON del campo detalle
-                    $detalle = !empty($h['detalle']) ? json_decode($h['detalle'], true) : [];
-                    $campo = $detalle['campo'] ?? $detalle['campo_afectado'] ?? '';
-                    $valorAnterior = $detalle['valor_anterior'] ?? '';
-                    $valorNuevo = $detalle['valor_nuevo'] ?? '';
-                    $cliente = $detalle['cliente'] ?? '';
-                ?>
-                <tr class="border-b">
-                    <td class="px-3 py-2"><?= date('d/m H:i', strtotime($h['fecha'])) ?></td>
-                    <td class="px-3 py-2"><?= h($h['usuario'] ?? 'Sistema') ?></td>
-                    <td class="px-3 py-2"><?= h($h['modulo'] ?? '') ?></td>
-                    <td class="px-3 py-2"><?= h($h['accion'] ?? '') ?></td>
-                    <td class="px-3 py-2">
-                        <?php if (!empty($campo)): ?>
-                            <div><strong><?= h($campo) ?>:</strong></div>
-                            <div>
-                                <span class="text-red-600 line-through"><?= h($valorAnterior) ?></span>
-                                → 
-                                <span class="text-green-600 font-semibold"><?= h($valorNuevo) ?></span>
-                            </div>
-                        <?php elseif (!empty($h['detalle'])): ?>
-                            <span class="text-gray-500"><?= h(substr($h['detalle'], 0, 100)) ?>...</span>
-                        <?php else: ?>
-                            <span class="text-gray-500">Sin detalles específicos</span>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <?php else: ?>
-    <p class="text-gray-500">No hay historial de cambios registrado.</p>
-    <?php endif; ?>
-</div>
-      </div>
-    </main>
-  </div>
-
   <script>
     const fAnio = document.getElementById('filtroAno');
     const fMes  = document.getElementById('filtroMes');
@@ -962,7 +957,8 @@ try {
         btn.textContent = 'Guardar';
         btn.disabled = false;
       }
-    });
+    }
+  );
 
     // Sidebar activo
     const currentPage = window.location.pathname.split('/').pop();
@@ -975,6 +971,20 @@ try {
     document.addEventListener('DOMContentLoaded', function() {
       recoverChangesFromBackup();
     });
+
+  document.getElementById('exportCsv').addEventListener('click', () => {
+  // Construir URL con filtros actuales
+  let url = window.location.pathname + '?export=csv';
+  const anio = fAnio.value;
+  const mes = fMes.value;
+  if(anio) url += '&anio=' + encodeURIComponent(anio);
+  if(mes) url += '&mes=' + encodeURIComponent(mes);
+
+  // Abrir descarga
+  window.location.href = url;
+});
   </script>
+
+
 </body>
 </html>

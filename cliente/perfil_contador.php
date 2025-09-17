@@ -47,26 +47,22 @@ $user_id = intval($user_id);
                 <span class="ml-2 text-white font-bold">Profinancial</span>
             </div>
         </div>
-        <nav class="flex-1 p-4">
-            <div class="space-y-2">
-                <a href="../cliente/index.php" id="clientes-tab" class="sidebar-item flex items-center p-3 rounded-lg">
-                    <i class="fas fa-users mr-3 text-gray-500"></i>
-                    Clientes
-                </a>
-                <a href="../cliente/consolidado.php" id="consolidado-tab" class="sidebar-item flex items-center p-3 rounded-lg">
-                    <i class="fas fa-file-alt mr-3 text-gray-500"></i>
-                    Consolidado
-                </a>
-                <a href="../cliente/perfil_contador.php" id="perfil-tab" class="sidebar-item flex items-center p-3 rounded-lg active">
-                    <i class="fas fa-user-circle mr-3 text-gray-500"></i>
-                    Mi Perfil
-                </a>
-                <a href="../logout.php" class="sidebar-item flex items-center p-3 rounded-lg text-red-600 hover:text-red-800">
-                    <i class="fas fa-sign-out-alt mr-3"></i>
-                    Cerrar Sesión
-                </a>
-            </div>
-        </nav>
+    <nav class="flex-1 p-4">
+      <div class="space-y-2">
+        <a href="../cliente/index.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-users mr-3 text-gray-500"></i> Clientes
+        </a>
+        <a href="../cliente/consolidado.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-file-alt mr-3 text-gray-500"></i> Consolidado
+        </a>
+        <a href="../cliente/historial.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-history mr-3 text-gray-500"></i> Historial
+        </a>
+        <a href="../cliente/perfil_contador.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-user-circle mr-3 text-gray-500"></i> Mi Perfil
+        </a>
+      </div>
+    </nav>
     </div>
 
     <!-- Contenido Principal -->

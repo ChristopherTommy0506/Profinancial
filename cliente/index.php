@@ -177,22 +177,22 @@ function fechaPeriodo($anio,$mes){
                     <span class="ml-2 text-white font-bold">Profinancial</span>
                 </div>
             </div>
-         <nav class="flex-1 p-4">
-            <div class="space-y-2">
-                <a href="../cliente/index.php" id="clientes-tab" class="sidebar-item flex items-center p-3 rounded-lg">
-                    <i class="fas fa-users mr-3 text-gray-500"></i>
-                    Clientes
-                </a>
-                    <a href="../cliente/consolidado.php" id="consolidado-tab" class="sidebar-item flex items-center p-3 rounded-lg">
-                    <i class="fas fa-file-alt mr-3 text-gray-500"></i>
-                    Consolidado
-                </a>
-                <a href="../cliente/perfil_contador.php" id="perfil-tab" class="sidebar-item flex items-center p-3 rounded-lg">
-                    <i class="fas fa-user-circle mr-3 text-gray-500"></i>
-                    Mi Perfil
-                </a>
-            </div>
-        </nav>
+    <nav class="flex-1 p-4">
+      <div class="space-y-2">
+        <a href="../cliente/index.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-users mr-3 text-gray-500"></i> Clientes
+        </a>
+        <a href="../cliente/consolidado.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-file-alt mr-3 text-gray-500"></i> Consolidado
+        </a>
+        <a href="../cliente/historial.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-history mr-3 text-gray-500"></i> Historial
+        </a>
+        <a href="../cliente/perfil_contador.php" class="sidebar-item flex items-center p-3 rounded-lg">
+          <i class="fas fa-user-circle mr-3 text-gray-500"></i> Mi Perfil
+        </a>
+      </div>
+    </nav>
         </div>
 
         <!-- Contenido principal  -->
@@ -206,7 +206,7 @@ function fechaPeriodo($anio,$mes){
                     <h1 class="text-xl font-semibold text-gray-800" id="page-title">Clientes</h1>
                     <div class="flex items-center space-x-4">
                         <div class="relative">
-                            <input id="filtroTexto" type="text" placeholder="Filtrar" class="search-box pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-indigo-500">
+                            <input id="filtroTexto" type="text" placeholder="Filtrar por nombre" class="search-box pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-indigo-500">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         </div>
                         <div class="flex items-center space-x-4">
