@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 03-09-2025 a las 20:50:17
+-- Tiempo de generación: 19-09-2025 a las 22:40:27
 -- Versión del servidor: 9.1.0
 -- Versión de PHP: 8.3.14
 
@@ -52,6 +52,23 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_marcar_presentado` (IN `p_presen
   SET @current_user_id = NULL;
 END$$
 
+DROP PROCEDURE IF EXISTS `sp_registrar_auditoria`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_registrar_auditoria` (IN `p_usuario_id` BIGINT, IN `p_modulo` VARCHAR(20), IN `p_cliente_id` BIGINT, IN `p_campo_afectado` VARCHAR(50), IN `p_valor_anterior` TEXT, IN `p_valor_nuevo` TEXT, IN `p_ip` VARCHAR(45), IN `p_user_agent` VARCHAR(255))   BEGIN
+  -- Construir el detalle JSON
+  SET @detalle_json = JSON_OBJECT(
+    'campo', p_campo_afectado,
+    'valor_anterior', p_valor_anterior,
+    'valor_nuevo', p_valor_nuevo,
+    'cliente_id', p_cliente_id,
+    'ip', p_ip,
+    'user_agent', p_user_agent
+  );
+
+  -- Insertar en auditoría
+  INSERT INTO auditoria (usuario_id, accion, modulo, detalle, ip)
+  VALUES (p_usuario_id, 'ACTUALIZACION', p_modulo, @detalle_json, p_ip);
+END$$
+
 DELIMITER ;
 
 -- --------------------------------------------------------
@@ -84,14 +101,40 @@ DROP TABLE IF EXISTS `auditoria`;
 CREATE TABLE IF NOT EXISTS `auditoria` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `usuario_id` bigint NOT NULL,
-  `accion` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `modulo` enum('IVA','PA','CONTABILIDAD','PLANILLA') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `accion` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `modulo` enum('CLIENTE','IVA','PA','CONTABILIDAD','PLANILLA') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cliente_id` bigint DEFAULT NULL COMMENT 'ID del cliente afectado',
+  `campo_afectado` varchar(64) DEFAULT NULL COMMENT 'Nombre del campo modificado',
+  `valor_anterior` text COMMENT 'Valor antes del cambio',
+  `valor_nuevo` text COMMENT 'Valor después del cambio',
   `detalle` json DEFAULT NULL,
-  `ip` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip` varchar(45) DEFAULT NULL COMMENT 'IP desde donde se realizó la acción',
+  `user_agent` varchar(255) DEFAULT NULL COMMENT 'Agente de usuario del navegador',
   `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_auditoria_usuario` (`usuario_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_auditoria_usuario` (`usuario_id`),
+  KEY `idx_auditoria_cliente` (`cliente_id`),
+  KEY `idx_auditoria_fecha` (`fecha`),
+  KEY `idx_auditoria_modulo` (`modulo`),
+  KEY `idx_auditoria_campo` (`campo_afectado`)
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Registro de auditoría de cambios en el sistema';
+
+--
+-- Volcado de datos para la tabla `auditoria`
+--
+
+INSERT INTO `auditoria` (`id`, `usuario_id`, `accion`, `modulo`, `cliente_id`, `campo_afectado`, `valor_anterior`, `valor_nuevo`, `detalle`, `ip`, `user_agent`, `fecha`) VALUES
+(1, 2, 'CAMBIO_ESTADO', 'PA', NULL, NULL, NULL, NULL, '{\"antes\": \"documento pendiente\", \"despues\": \"pagada\", \"cliente_id\": 1, \"cliente_nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}', NULL, NULL, '2025-09-03 22:04:25'),
+(2, 2, 'ACTUALIZAR', 'CLIENTE', 12, 'nombre', 'Juan', 'Juan Guarnizo', '{\"tipo\": \"campo_cliente\", \"campo\": \"nombre\", \"timestamp\": \"2025-09-03 22:16:30\", \"valor_nuevo\": \"Juan Guarnizo\", \"valor_anterior\": \"Juan\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0', '2025-09-03 22:16:30'),
+(3, 2, 'ACTUALIZAR', 'CLIENTE', 17, 'contador', 'Jose', 'Jose Jose', '{\"tipo\": \"campo_cliente\", \"campo\": \"contador\", \"timestamp\": \"2025-09-03 22:28:32\", \"valor_nuevo\": \"Jose Jose\", \"valor_anterior\": \"Jose\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0', '2025-09-03 22:28:32'),
+(4, 2, 'ACTUALIZAR', 'CLIENTE', 16, 'nombre', 'Julio', 'TELETTON', '{\"tipo\": \"campo_cliente\", \"campo\": \"nombre\", \"timestamp\": \"2025-09-03 22:29:21\", \"valor_nuevo\": \"TELETTON\", \"valor_anterior\": \"Julio\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0', '2025-09-03 22:29:21'),
+(5, 2, 'ACTUALIZAR', 'CLIENTE', 16, 'nombre', 'TELETTON', 'TELETTONÑAÑÑA', '{\"tipo\": \"campo_cliente\", \"campo\": \"nombre\", \"timestamp\": \"2025-09-03 22:29:33\", \"valor_nuevo\": \"TELETTONÑAÑÑA\", \"valor_anterior\": \"TELETTON\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0', '2025-09-03 22:29:33'),
+(6, 3, 'CAMBIO_ESTADO', 'CONTABILIDAD', NULL, NULL, NULL, NULL, '{\"antes\": \"pendiente de procesar\", \"despues\": \"en proceso\", \"cliente_id\": 13, \"cliente_nombre\": \"tommy\"}', NULL, NULL, '2025-09-16 23:00:50'),
+(7, 3, 'ACTUALIZAR_ESTADO', 'CONTABILIDAD', 13, 'declaracion_contabilidad', 'pendiente de procesar', 'en proceso', '{\"tipo\": \"estado_declaracion\", \"timestamp\": \"2025-09-16 23:00:50\", \"declaracion\": \"conta\", \"valor_nuevo\": \"en proceso\", \"valor_anterior\": \"pendiente de procesar\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0', '2025-09-16 23:00:50'),
+(8, 3, 'CAMBIO_ESTADO', 'CONTABILIDAD', NULL, NULL, NULL, NULL, '{\"antes\": \"en proceso\", \"despues\": \"pendiente de procesar\", \"cliente_id\": 13, \"cliente_nombre\": \"tommy\"}', NULL, NULL, '2025-09-16 23:10:11'),
+(9, 3, 'ACTUALIZAR_ESTADO', 'CONTABILIDAD', 13, 'declaracion_contabilidad', 'en proceso', 'pendiente de procesar', '{\"tipo\": \"estado_declaracion\", \"timestamp\": \"2025-09-16 23:10:11\", \"declaracion\": \"conta\", \"valor_nuevo\": \"pendiente de procesar\", \"valor_anterior\": \"en proceso\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0', '2025-09-16 23:10:11'),
+(10, 3, 'CAMBIO_ESTADO', 'CONTABILIDAD', NULL, NULL, NULL, NULL, '{\"antes\": \"pendiente de procesar\", \"despues\": \"presentada\", \"cliente_id\": 13, \"cliente_nombre\": \"tommy\"}', NULL, NULL, '2025-09-16 23:12:49'),
+(11, 3, 'ACTUALIZAR_ESTADO', 'CONTABILIDAD', 13, 'declaracion_contabilidad', 'pendiente de procesar', 'presentada', '{\"tipo\": \"estado_declaracion\", \"timestamp\": \"2025-09-16 23:12:49\", \"declaracion\": \"conta\", \"valor_nuevo\": \"presentada\", \"valor_anterior\": \"pendiente de procesar\"}', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0', '2025-09-16 23:12:49');
 
 -- --------------------------------------------------------
 
@@ -113,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `bitacora_actividad` (
   KEY `idx_bitacora_usuario` (`usuario_id`),
   KEY `idx_bitacora_accion` (`accion`),
   KEY `idx_bitacora_entidad` (`entidad`,`entidad_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=171 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `bitacora_actividad`
@@ -238,7 +281,44 @@ INSERT INTO `bitacora_actividad` (`id`, `usuario_id`, `accion`, `entidad`, `enti
 (116, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-01 23:29:54'),
 (117, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-01 23:30:21'),
 (118, 2, 'ACTUALIZAR_USUARIO', 'usuarios', 2, '{\"antes\": {\"email\": \"jrsanchezjacinto72@gmail.com\", \"activo\": 1, \"nombre\": \"Julio Rodrigo Sanchez Jacinto\"}, \"despues\": {\"email\": \"jrsanchezjacinto72@gmail.com\", \"activo\": 1, \"nombre\": \"Julio Rodrigo Sanchez Jacintoo\"}}', NULL, '2025-09-03 20:44:55'),
-(119, 2, 'ACTUALIZAR_USUARIO', 'usuarios', 2, '{\"nombre\": {\"antes\": \"Julio Rodrigo Sanchez Jacinto\", \"despues\": \"Julio Rodrigo Sanchez Jacintoo\"}}', NULL, '2025-09-03 20:44:55');
+(119, 2, 'ACTUALIZAR_USUARIO', 'usuarios', 2, '{\"nombre\": {\"antes\": \"Julio Rodrigo Sanchez Jacinto\", \"despues\": \"Julio Rodrigo Sanchez Jacintoo\"}}', NULL, '2025-09-03 20:44:55'),
+(123, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 19, '{\"antes\": {\"nit\": \"01702630000773\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo ja\"}, \"despues\": {\"nit\": \"01702630000773\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo ja\"}}', NULL, '2025-09-03 20:55:42'),
+(125, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 19, '{\"antes\": {\"nit\": \"01702630000773\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo ja\"}, \"despues\": {\"nit\": \"01702630000773\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo ja\"}}', NULL, '2025-09-03 20:56:54'),
+(129, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 4, '{\"antes\": {\"nit\": \"0614-100404-004-3\", \"nrc\": \"20004-4\", \"nombre\": \"Eclipse Retail S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100404-004-3\", \"nrc\": \"20004-4\", \"nombre\": \"Eclipse Retail S.A. de C.V.\"}}', NULL, '2025-09-03 21:03:27'),
+(131, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 4, '{\"antes\": {\"nit\": \"0614-100404-004-3\", \"nrc\": \"20004-4\", \"nombre\": \"Eclipse Retail S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100404-004-3\", \"nrc\": \"20004-4\", \"nombre\": \"Eclipse Retail S.A. de C.V.\"}}', NULL, '2025-09-03 21:06:15'),
+(132, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 4, '{\"antes\": {\"nit\": \"0614-100404-004-3\", \"nrc\": \"20004-4\", \"nombre\": \"Eclipse Retail S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100404-004-3\", \"nrc\": \"20004-4\", \"nombre\": \"Eclipse Retail S.A. de C.V.\"}}', NULL, '2025-09-03 21:06:15'),
+(133, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 21:06:25'),
+(134, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 21:06:25'),
+(135, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 21:06:25'),
+(137, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 2, '{\"antes\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}}', NULL, '2025-09-03 21:07:21'),
+(139, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 2, '{\"antes\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}}', NULL, '2025-09-03 21:09:12'),
+(140, NULL, 'ACTUALIZAR_CLIENTE', 'clientes', 2, '{\"antes\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}, \"despues\": {\"nit\": \"0614-100202-002-1\", \"nrc\": \"20002-2\", \"nombre\": \"Brisa Textiles S.A. de C.V.\"}}', NULL, '2025-09-03 21:09:12'),
+(142, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 21:54:51'),
+(145, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 22:03:28'),
+(147, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 22:04:25'),
+(148, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 22:04:25'),
+(149, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 22:04:28'),
+(150, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 22:04:28'),
+(151, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 22:04:43'),
+(152, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 22:04:43'),
+(153, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 1, '{\"antes\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}, \"despues\": {\"nit\": \"0614-100101-001-0\", \"nrc\": \"20001-1\", \"nombre\": \"Aurora Logistics S.A. de C.V. Prueba\"}}', NULL, '2025-09-03 22:04:43'),
+(154, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 12, '{\"antes\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan\"}, \"despues\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan Guarnizo\"}}', NULL, '2025-09-03 22:16:30'),
+(155, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 12, '{\"antes\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan Guarnizo\"}, \"despues\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan Guarnizo\"}}', NULL, '2025-09-03 22:16:31'),
+(156, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 12, '{\"antes\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan Guarnizo\"}, \"despues\": {\"nit\": \"01702630\", \"nrc\": \"25326326\", \"nombre\": \"Juan Guarnizo\"}}', NULL, '2025-09-03 22:16:31'),
+(157, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 17, '{\"antes\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}, \"despues\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}}', NULL, '2025-09-03 22:28:32'),
+(158, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 17, '{\"antes\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}, \"despues\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}}', NULL, '2025-09-03 22:28:42'),
+(159, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 17, '{\"antes\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}, \"despues\": {\"nit\": \"017026300007\", \"nrc\": \"25326326\", \"nombre\": \"Rodrigo\"}}', NULL, '2025-09-03 22:28:42'),
+(160, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 16, '{\"antes\": {\"nit\": \"01702630000\", \"nrc\": \"25326326\", \"nombre\": \"Julio\"}, \"despues\": {\"nit\": \"01702630000\", \"nrc\": \"25326326\", \"nombre\": \"TELETTON\"}}', NULL, '2025-09-03 22:29:21'),
+(161, 2, 'ACTUALIZAR_CLIENTE', 'clientes', 16, '{\"antes\": {\"nit\": \"01702630000\", \"nrc\": \"25326326\", \"nombre\": \"TELETTON\"}, \"despues\": {\"nit\": \"01702630000\", \"nrc\": \"25326326\", \"nombre\": \"TELETTONÑAÑÑA\"}}', NULL, '2025-09-03 22:29:33'),
+(162, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:00:50'),
+(163, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:00:51'),
+(164, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:00:51'),
+(165, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:10:11'),
+(166, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:10:11'),
+(167, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:10:11'),
+(168, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:12:49'),
+(169, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:12:49'),
+(170, 3, 'ACTUALIZAR_CLIENTE', 'clientes', 13, '{\"antes\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}, \"despues\": {\"nit\": \"017026300\", \"nrc\": \"253263260\", \"nombre\": \"tommy\"}}', NULL, '2025-09-16 23:12:49');
 
 -- --------------------------------------------------------
 
@@ -280,22 +360,22 @@ CREATE TABLE IF NOT EXISTS `clientes` (
 --
 
 INSERT INTO `clientes` (`id`, `nombre`, `nit`, `nrc`, `contacto`, `telefono`, `email`, `clave_hacienda`, `clave_planilla`, `contador`, `direccion`, `activo`, `creado_en`, `actualizado_en`, `declaracion_iva`, `declaracion_pa`, `declaracion_planilla`, `declaracion_contabilidad`) VALUES
-(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-01', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-09-01 23:30:21', 'pagada', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'AH-BRI-2025', 'PL-BRI-02', 'Luis Herrera', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', '2025-09-01 23:29:07', 'documento pendiente', 'en proceso', 'pagada', 'pendiente de procesar'),
+(1, 'Aurora Logistics S.A. de C.V. Prueba', '0614-100101-001-0', '20001-1', 'Ana Peron', '+503 2222 1111', 'contacto@auroralog.com', 'AH-AUR-2025', 'PL-AUR-012', 'María Torres', 'San Salvador, Escalón', 1, '2025-08-18 23:39:07', '2025-09-03 22:04:43', 'pagada', 'pagada', 'documento pendiente', 'presentada'),
+(2, 'Brisa Textiles S.A. de C.V.', '0614-100202-002-1', '20002-2', 'Bruno Díaz', '+503 2222 2002', 'admin@brisatex.com', 'AH-BRI-2025', 'PL-BRI-02', 'Luis Herrera', 'San Salvador, San Benito', 1, '2025-08-18 23:39:07', '2025-09-03 21:09:12', 'documento pendiente', 'en proceso', 'pagada', 'presentada'),
 (3, 'Cobalto Foods S.A. de C.V.', '0614-100303-003-2', '20003-3', 'Carla Ramos', '+503 2222 3003', 'finanzas@cobaltofoods.com', 'AH-COB-2025', 'PL-COB-03', 'Carolina Gómez', 'Santa Tecla, La Libertad', 1, '2025-08-18 23:39:07', '2025-09-01 23:11:56', 'en proceso', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(4, 'Eclipse Retail S.A. de C.V.', '0614-100404-004-3', '20004-4', 'Eduardo Molina', '+503 2222 4004', 'contacto@eclipseretail.com', 'AH-ECL-2025', 'PL-ECL-04', 'Eduardo Rivera', 'Antiguo Cuscatlán', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(4, 'Eclipse Retail S.A. de C.V.', '0614-100404-004-3', '20004-4', 'Eduardo Molina', '+503 2222 4004', 'contacto@eclipseretail.com', 'AH-ECL-2025', 'PL-ECL-04', 'Eduardo Rivera', 'Antiguo Cuscatlán', 1, '2025-08-18 23:39:07', '2025-09-03 21:06:15', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'presentada'),
 (5, 'Fénix Agro S.A. de C.V.', '0614-100505-005-4', '20005-5', 'Fernanda Cruz', '+503 2222 5005', 'info@fenixagro.com', 'AH-FEN-2025', 'PL-FEN-05', 'Fernanda Soto', 'Soyapango', 1, '2025-08-18 23:39:07', '2025-08-29 22:15:08', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (6, 'Galaxia Media S.A. de C.V.', '0614-100606-006-5', '20006-6', 'Gabriela Soto', '+503 2222 6006', 'contacto@galaxiamedia.com', 'AH-GAL-2025', 'PL-GAL-06', 'Gabriela Núñez', 'Santa Tecla', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (7, 'Horizonte Construcciones S.A. de C.V.', '0614-100707-007-6', '20007-7', 'Héctor Pineda', '+503 2222 7007', 'proyectos@horizonte.com', 'AH-HOR-2025', 'PL-HOR-07', 'Héctor Ramos', 'San Miguel', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (8, 'Ícaro Travel S.A. de C.V.', '0614-100808-008-7', '20008-8', 'Irene Lazo', '+503 2222 8008', 'ventas@icarotravel.com', 'AH-ICA-2025', 'PL-ICA-08', 'Irene Morales', 'La Libertad', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (9, 'Jaguar Security S.A. de C.V.', '0614-100909-009-8', '20009-9', 'Javier Campos', '+503 2222 9009', 'operaciones@jaguarsec.com', 'AH-JAG-2025', 'PL-JAG-09', 'Javier Pineda', 'San Salvador, Centro', 1, '2025-08-18 23:39:07', '2025-08-20 23:49:28', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
 (10, 'Kappa Servicios S.A. de C.V.', '0614-101010-010-9', '20010-0', 'Karla Mejía', '+503 2222 1010', 'soporte@kappasv.com', '', '', '', 'Mejicanos', 1, '2025-08-18 23:39:07', '2025-09-01 21:29:35', 'pagada', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(12, 'Juan', '01702630', '25326326', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170291', 'Jose', 'Calle', 1, '2025-08-29 20:52:31', '2025-08-29 21:35:40', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
-(13, 'tommy', '017026300', '253263260', 'messi', '75747039', 'jr@gmail.com', '20170295', '20170295', 'Jose', 'Colonia Zacamil', 1, '2025-08-29 21:45:42', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(12, 'Juan Guarnizo', '01702630', '25326326', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170291', 'Jose', 'Calle', 1, '2025-08-29 20:52:31', '2025-09-03 22:16:30', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'pendiente de procesar'),
+(13, 'tommy', '017026300', '253263260', 'messi', '75747039', 'jr@gmail.com', '20170295', '20170295', 'Jose', 'Colonia Zacamil', 1, '2025-08-29 21:45:42', '2025-09-16 23:12:49', 'documento pendiente', 'documento pendiente', 'documento pendiente', 'presentada'),
 (14, 'Julio', '017026309', '253263269', 'messi', '75747039', 'jr@gmail.com', '20170293', '20170293', 'Jose', 'Calle', 1, '2025-08-29 22:52:24', '2025-09-01 21:47:50', 'presentada', 'presentada', 'pagada', 'presentada'),
 (15, 'Julio', '017026360', '253263269', 'messi', '75747039', 'jr@gmail.com', '20354982', '20354982', 'Jose', 'Calle', 1, '2025-08-29 23:01:49', NULL, 'presentada', 'presentada', 'presentada', 'en proceso'),
-(16, 'Julio', '01702630000', '25326326', 'messi', '75747039', 'jr@gmail.com', '2', '2', 'Jose', 'Calle', 1, '2025-08-29 23:05:51', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', ''),
-(17, 'Rodrigo', '017026300007', '25326326', 'messi', '75747039', 'jr@gmail.com', '12345678', '123456789', 'Jose', 'Colonia Zacamil', 1, '2025-09-01 21:49:31', '2025-09-01 22:21:06', 'pagada', 'pagada', 'pagada', 'presentada'),
+(16, 'TELETTONÑAÑÑA', '01702630000', '25326326', 'messi', '75747039', 'jr@gmail.com', '2', '2', 'Jose', 'Calle', 1, '2025-08-29 23:05:51', '2025-09-03 22:29:33', 'documento pendiente', 'documento pendiente', 'documento pendiente', ''),
+(17, 'Rodrigo', '017026300007', '25326326', 'messi', '75747039', 'jr@gmail.com', '12345678', '123456789', 'Jose Jose', 'Colonia Zacamil', 1, '2025-09-01 21:49:31', '2025-09-03 22:28:32', 'pagada', 'pagada', 'pagada', 'presentada'),
 (18, 'Rodrigo j', '0170263000077', '25326326', 'messi', '75747039', 'jr@gmail.com', '17171', '171717', 'Jose', 'Colonia Zacamil', 1, '2025-09-01 21:50:17', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', ''),
 (19, 'Rodrigo ja', '01702630000773', '25326326', 'messi', '75747039', 'jr@gmail.com', '2', '2', 'Jose', '', 1, '2025-09-01 21:57:20', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', ''),
 (20, 'Rodrigo jac', '017026300007733', '25326326', 'messi', '75747039', 'jr@gmail.com', '30', '30', 'Jose', 'Colonia Zacamil', 1, '2025-09-01 22:04:30', NULL, 'documento pendiente', 'documento pendiente', 'documento pendiente', 'documento pendiente'),
@@ -328,32 +408,69 @@ DELIMITER ;
 DROP TRIGGER IF EXISTS `trg_clientes_auditoria`;
 DELIMITER $$
 CREATE TRIGGER `trg_clientes_auditoria` AFTER UPDATE ON `clientes` FOR EACH ROW BEGIN
+  DECLARE v_usuario_id BIGINT;
+  
+  -- Obtener el usuario actual de la variable de sesión
+  SET v_usuario_id = NULLIF(@current_user_id, 0);
+  
+  -- Verificar si el usuario existe en la tabla usuarios
+  IF v_usuario_id IS NOT NULL THEN
+    IF NOT EXISTS (SELECT 1 FROM usuarios WHERE id = v_usuario_id) THEN
+      SET v_usuario_id = NULL;
+    END IF;
+  END IF;
+  
+  -- Si no hay usuario válido, usar usuario "Sistema" (ID 1)
+  IF v_usuario_id IS NULL THEN
+    SET v_usuario_id = 1; -- ID del usuario Sistema
+  END IF;
+
   -- Si cambia el estado de IVA
   IF (OLD.declaracion_iva <> NEW.declaracion_iva) THEN
     INSERT INTO auditoria (usuario_id, accion, modulo, detalle)
-    VALUES (NULLIF(@current_user_id,0), 'CAMBIO_ESTADO', 'IVA',
-            JSON_OBJECT('antes', OLD.declaracion_iva, 'despues', NEW.declaracion_iva));
+    VALUES (v_usuario_id, 'CAMBIO_ESTADO', 'IVA',
+            JSON_OBJECT(
+              'cliente_id', NEW.id,
+              'cliente_nombre', NEW.nombre,
+              'antes', OLD.declaracion_iva, 
+              'despues', NEW.declaracion_iva
+            ));
   END IF;
 
   -- Si cambia el estado de PA
   IF (OLD.declaracion_pa <> NEW.declaracion_pa) THEN
     INSERT INTO auditoria (usuario_id, accion, modulo, detalle)
-    VALUES (NULLIF(@current_user_id,0), 'CAMBIO_ESTADO', 'PA',
-            JSON_OBJECT('antes', OLD.declaracion_pa, 'despues', NEW.declaracion_pa));
+    VALUES (v_usuario_id, 'CAMBIO_ESTADO', 'PA',
+            JSON_OBJECT(
+              'cliente_id', NEW.id,
+              'cliente_nombre', NEW.nombre,
+              'antes', OLD.declaracion_pa, 
+              'despues', NEW.declaracion_pa
+            ));
   END IF;
 
   -- Si cambia el estado de PLANILLA
   IF (OLD.declaracion_planilla <> NEW.declaracion_planilla) THEN
     INSERT INTO auditoria (usuario_id, accion, modulo, detalle)
-    VALUES (NULLIF(@current_user_id,0), 'CAMBIO_ESTADO', 'PLANILLA',
-            JSON_OBJECT('antes', OLD.declaracion_planilla, 'despues', NEW.declaracion_planilla));
+    VALUES (v_usuario_id, 'CAMBIO_ESTADO', 'PLANILLA',
+            JSON_OBJECT(
+              'cliente_id', NEW.id,
+              'cliente_nombre', NEW.nombre,
+              'antes', OLD.declaracion_planilla, 
+              'despues', NEW.declaracion_planilla
+            ));
   END IF;
 
   -- Si cambia el estado de CONTABILIDAD
   IF (OLD.declaracion_contabilidad <> NEW.declaracion_contabilidad) THEN
     INSERT INTO auditoria (usuario_id, accion, modulo, detalle)
-    VALUES (NULLIF(@current_user_id,0), 'CAMBIO_ESTADO', 'CONTABILIDAD',
-            JSON_OBJECT('antes', OLD.declaracion_contabilidad, 'despues', NEW.declaracion_contabilidad));
+    VALUES (v_usuario_id, 'CAMBIO_ESTADO', 'CONTABILIDAD',
+            JSON_OBJECT(
+              'cliente_id', NEW.id,
+              'cliente_nombre', NEW.nombre,
+              'antes', OLD.declaracion_contabilidad, 
+              'despues', NEW.declaracion_contabilidad
+            ));
   END IF;
 END
 $$
@@ -771,12 +888,6 @@ DELIMITER ;
 ALTER TABLE `asignaciones_cliente`
   ADD CONSTRAINT `fk_asig_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`),
   ADD CONSTRAINT `fk_asig_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
-
---
--- Filtros para la tabla `auditoria`
---
-ALTER TABLE `auditoria`
-  ADD CONSTRAINT `fk_auditoria_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `bitacora_actividad`
